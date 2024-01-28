@@ -9,6 +9,8 @@ import { ErrorMessages } from "$lib/utils/enums/enums";
 import { invoke } from "@tauri-apps/api";
 
 import { HeaderDashboardViewModel } from "$lib/components/header/header-dashboard/HeaderDashboard.ViewModel";
+import MixpanelEvent from "$lib/utils/mixpanel/MixpanelEvent";
+import { Events } from "$lib/utils/enums/mixpanel-events.enum";
 const apiTimeOut = constants.API_SEND_TIMEOUT;
 
 const _viewModel = new HeaderDashboardViewModel();
@@ -35,6 +37,13 @@ const success = (data, tabId) => {
 
 const getAuthHeaders = () => {
   return {
+    Authorization: `Bearer ${getUserToken()}`,
+  };
+};
+
+const getMultipartAuthHeaders = () => {
+  return {
+    "Content-Type": "multipart/form-data",
     Authorization: `Bearer ${getUserToken()}`,
   };
 };
@@ -129,7 +138,9 @@ const makeHttpRequest = async (
   request: string,
   tabId: string,
 ) => {
+  console.table({ url, method, headers, body, request });
   let response;
+  MixpanelEvent(Events.SEND_API_REQUEST, { method: method });
 
   return Promise.race([
     timeout(apiTimeOut),
@@ -163,5 +174,6 @@ export {
   getAuthHeaders,
   getRefHeaders,
   makeHttpRequest,
+  getMultipartAuthHeaders,
   // getHeaders,
 };

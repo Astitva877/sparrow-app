@@ -6,7 +6,10 @@
   import Folder from "./Folder.svelte";
   import FilterDropDown from "$lib/components/dropdown/FilterDropDown.svelte";
   import RequestDropdown from "$lib/components/dropdown/RequestDropdown.svelte";
-  import { collapsibleState } from "$lib/store/request-response-section";
+  import {
+    collapseAnimationAppliedStore,
+    collapsibleState,
+  } from "$lib/store/request-response-section";
   import SearchTree from "$lib/components/collections/collections-list/searchTree/SearchTree.svelte";
   import { useTree } from "./collectionList";
   import { v4 as uuidv4 } from "uuid";
@@ -36,7 +39,8 @@
   export let activeTabId: string;
   export let activePath;
   export let environments = [];
-
+  export let runAnimation: boolean = false;
+  export let changeAnimation: () => void;
   const _colllectionListViewModel = new CollectionListViewModel();
   const _workspaceViewModel = new HeaderDashboardViewModel();
 
@@ -46,6 +50,10 @@
   import Spinner from "$lib/components/Transition/Spinner.svelte";
   import EnvironmentDropdown from "$lib/components/dropdown/EnvironmentDropdown.svelte";
   import { environmentType } from "$lib/utils/enums/environment.enum";
+  import { createCollectionSource } from "$lib/store/event-source.store";
+  import MixpanelEvent from "$lib/utils/mixpanel/MixpanelEvent";
+  import { Events } from "$lib/utils/enums/mixpanel-events.enum";
+  import { currentWorkspace, setCurrentWorkspace } from "$lib/store";
   const [, , searchNode] = useTree();
   let collection: any[];
   let currentWorkspaceId: string = "";
@@ -67,6 +75,7 @@
   let filteredSelectedMethodsCollection = [];
   let collapsExpandToggle: boolean = false;
 
+  let collapseAnimationApplied: boolean = false;
   const collections: Observable<CollectionDocument[]> =
     _colllectionListViewModel.collection;
   const activeWorkspace: Observable<WorkspaceDocument> =
@@ -93,7 +102,10 @@
   const workspaceUnsubscribe = workspacesArr.subscribe((workspaces) => {
     workspaces.map((workspace) => {
       if (workspace._data.isActiveWorkspace) {
-        showDefault = workspace._data.collections.length === 0 ? true : false;
+        showDefault = true;
+        if (workspace._data.collections && workspace._data.collections.length) {
+          showDefault = false;
+        }
         return;
       }
     });
@@ -162,6 +174,10 @@
         }
         currentWorkspaceName = activeWorkspaceRxDoc.get("name");
         currentWorkspaceId = activeWorkspaceRxDoc.get("_id");
+        setCurrentWorkspace(
+          activeWorkspaceRxDoc.get("_id"),
+          activeWorkspaceRxDoc.get("name"),
+        );
         const workspaceId = activeWorkspaceRxDoc.get("_id");
         if (trackWorkspaceId !== workspaceId) {
           const response =
@@ -176,6 +192,11 @@
       }
     },
   );
+  let collectionSource = "";
+  createCollectionSource.subscribe((value) => {
+    collectionSource = value;
+  });
+
   let collectionUnderCreation: boolean = false;
   const handleCreateCollection = async () => {
     showDefault = false;
@@ -232,6 +253,11 @@
         name: newCollection.name,
       });
       notifications.success("New Collection Created");
+      MixpanelEvent(Events.CREATE_COLLECTION, {
+        source: collectionSource,
+        collectionName: response.data.data.name,
+        collectionId: response.data.data._id,
+      });
       return;
     }
     return;
@@ -254,9 +280,10 @@
   });
 
   const setcollapsExpandToggle = () => {
+    collapseAnimationApplied = true;
+    changeAnimation();
     collapsExpandToggle = !collapsExpandToggle;
     collapsibleState.set(collapsExpandToggle);
-
     if (collapsExpandToggle) {
       document
         .getElementsByClassName("sidebar")[0]
@@ -264,6 +291,7 @@
       document
         .getElementsByClassName("sidebar")[0]
         .classList.remove("increase-width");
+      collapseAnimationAppliedStore.set(true);
     } else {
       document
         .getElementsByClassName("sidebar")[0]
@@ -271,6 +299,7 @@
       document
         .getElementsByClassName("sidebar")[0]
         .classList.remove("decrease-width");
+      collapseAnimationAppliedStore.set(true);
     }
   };
 
@@ -361,15 +390,19 @@
 <div
   style="border-right: {collapsExpandToggle
     ? '0px'
-    : '1px solid #313233'};overflow:auto"
-  class={`sidebar ${
-    collapsExpandToggle ? "decrease-width" : "increase-width"
+    : '1px solid #313233'};overflow:auto; width: {collapsExpandToggle
+    ? '0'
+    : '280px'}"
+  class={`sidebar overflow-y-auto  ${
+    collapsExpandToggle && runAnimation
+      ? "decrease-width"
+      : runAnimation && " increase-width"
   } d-flex flex-column bg-backgroundColor scroll`}
 >
   <div
     class="d-flex justify-content-between align-items-center align-self-stretch ps-3 pe-3 pt-3"
   >
-    <p class="mb-0 text-whiteColor" style="font-size: 18px;">
+    <p class="mb-0 text-whiteColor ellipsis" style="font-size: 18px;">
       {currentWorkspaceName || ""}
     </p>
     <button
@@ -410,13 +443,13 @@
   >
     <div
       style="height:32px; width:180px "
-      class="inputField bg-blackColor ps-2 pe-1 gap-2 d-flex align-items-center justify-content-center rounded"
+      class="inputField bg-backgroundDark ps-2 pe-1 gap-2 d-flex align-items-center justify-content-center rounded"
     >
       <SearchIcon />
       <input
         type="search"
         style="  font-size: 12px;font-weight:500;"
-        class="inputField border-0 w-100 h-100 bg-blackColor"
+        class="inputField searchField border-0 w-100 h-100 bg-backgroundDark"
         placeholder="Search APIs in {currentWorkspaceName || ''}"
         bind:value={searchData}
         on:input={() => {
@@ -428,7 +461,8 @@
     <div class="d-flex align-items-center justify-content-center">
       <button
         id="filter-btn"
-        class="btn btn-blackColor d-flex align-items-center justify-content-center"
+        class="filter-btn btn bg-backgroundDark d-flex align-items-center justify-content-center
+        {showfilterDropdown ? 'filter-active' : ''}"
         style="width: 32px; height:32px; position:relative"
         on:click={handleFilterDropdown}
       >
@@ -451,7 +485,7 @@
     </div>
   </div>
   <div
-    class="d-flex flex-column pt-3 ps-3 pe-3 collections-list pb-4"
+    class="d-flex flex-column pt-3 ps-3 pe-3 collections-list sparrow-thin-scrollbar pb-4"
     style="overflow:auto;margin-top:5px;"
   >
     <div class="d-flex flex-column justify-content-center">
@@ -584,12 +618,6 @@
   .inputField:hover {
     border: 1px solid var(--workspace-hover-color);
   }
-  .collections-list::-webkit-scrollbar {
-    width: 2px;
-  }
-  .collections-list::-webkit-scrollbar-thumb {
-    background: #888;
-  }
 
   @keyframes increaseWidth {
     0% {
@@ -625,5 +653,13 @@
     justify-content: center;
     align-items: center;
     overflow: hidden;
+  }
+  .searchField {
+  }
+  .filter-btn {
+    /* border: 1px solid var(--border-color) !important; */
+  }
+  .filter-active {
+    background-color: var(--send-button) !important;
   }
 </style>

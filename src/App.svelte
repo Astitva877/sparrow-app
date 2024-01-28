@@ -6,21 +6,19 @@
   import RegisterPage from "./pages/Auth/register-page/RegisterPage.svelte";
   import Authguard from "./routing/Authguard.svelte";
   import Navigate from "./routing/Navigate.svelte";
-  import Dashboard from "./pages/Dashboard/Dashboard.svelte";
+  import Dashboard from "./pages/dashboard/Dashboard.svelte";
   import UpdatePassword from "./pages/Auth/update-password/UpdatePassword.svelte";
   import ResetPassword from "./pages/Auth/reset-password/ResetPassword.svelte";
   import ForgotPassword from "./pages/Auth/forgot-password/ForgotPassword.svelte";
   import Waiting from "./pages/Home/Waiting.svelte";
   import { TabRepository } from "$lib/repositories/tab.repository";
   import { syncTabs } from "$lib/store/request-response-section";
-
   import {
     resizeWindowOnLogOut,
     resizeWindowOnLogin,
   } from "$lib/components/header/window-resize";
 
   import { onMount } from "svelte";
-
   import { setUser, user } from "$lib/store/auth.store";
   import { listen } from "@tauri-apps/api/event";
   import { appWindow } from "@tauri-apps/api/window";
@@ -33,11 +31,11 @@
   import WelcomeScreen from "$lib/components/Transition/WelcomeScreen.svelte";
   import { checkUpdate, installUpdate } from "@tauri-apps/api/updater";
   import { relaunch } from "@tauri-apps/api/process";
-  
+  import { handleShortcuts } from "$lib/utils/shortcuts";
+
   export let url = "/";
   const tabRepository = new TabRepository();
   let flag: boolean = true;
-
   let tabList = tabRepository.getTabList();
   let sample = generateSampleRequest("id", new Date().toString());
   tabList.subscribe((val) => {
@@ -66,15 +64,13 @@
     }
   });
 
-  onMount(async () => {
+  async function checkForUpdate() {
     try {
       const { shouldUpdate, manifest } = await checkUpdate();
-      console.log(shouldUpdate)
-      console.log(manifest)
+      console.log(shouldUpdate);
+      console.log(manifest);
       if (shouldUpdate) {
-        // display dialog
         await installUpdate();
-        // install complete, restart app
         await relaunch();
       }
     } catch (error) {
@@ -86,6 +82,10 @@
     listen("tauri://update-status", function (res) {
       console.log("New status: ", res);
     });
+  }
+
+  onMount(async () => {
+    await checkForUpdate();
     listen("receive-login", async (event: any) => {
       const params = new URLSearchParams(event.payload.url.split("?")[1]);
       const accessToken = params.get("accessToken");
@@ -97,7 +97,7 @@
         setAuthJwt(constants.REF_TOKEN, refreshToken);
         setUser(jwtDecode(accessToken));
         notifications.success("Login successful!");
-        navigate("/home");
+        navigate("/dashboard/collections");
         await resizeWindowOnLogin();
       }
     });
@@ -136,6 +136,7 @@
 </Router>
 
 <Toast />
+<svelte:window on:keydown={handleShortcuts} />;
 
 <style>
 </style>

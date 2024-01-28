@@ -2,7 +2,9 @@
   import { SearchIcon, EditIcon } from "$lib/assets/app.asset";
   import Crossicon from "$lib/assets/crossicon.svelte";
   import trashIcon from "$lib/assets/trash-icon.svg";
+  import { Events } from "$lib/utils/enums/mixpanel-events.enum";
   import type { EnvValuePair } from "$lib/utils/interfaces/request.interface";
+  import MixpanelEvent from "$lib/utils/mixpanel/MixpanelEvent";
   import Tooltip from "../tooltip/Tooltip.svelte";
   type Mode = "READ" | "WRITE";
 
@@ -126,6 +128,7 @@
       placeholder="Search environment variables"
       bind:value={filterText}
       on:input={(e) => handleFilterTextChange(e)}
+      on:click={() => MixpanelEvent(Events.SEARCH_ENVIRONMENT_VARIABLES)}
     />
     {#if filterText !== ""}
       <button class="border-0 bg-transparent ms-2" on:click={handleEraseSearch}>
@@ -157,7 +160,7 @@
   </div>
 
   <div
-    class="w-100 env-var-container"
+    class="w-100 env-var-container sparrow-thin-scrollbar"
     style="display:block;
         "
   >
@@ -352,12 +355,7 @@
     overflow-y: auto;
     height: 68vh;
   }
-  .env-var-container::-webkit-scrollbar {
-    width: 4px;
-  }
-  .env-var-container::-webkit-scrollbar-thumb {
-    background: #888;
-  }
+
   .delete-btn {
     background: transparent;
   }

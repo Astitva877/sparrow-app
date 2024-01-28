@@ -24,6 +24,7 @@ import { RxDBMigrationPlugin } from "rxdb/plugins/migration";
 import { RxDBUpdatePlugin } from "rxdb/plugins/update";
 import { RxDBQueryBuilderPlugin } from "rxdb/plugins/query-builder";
 import constants from "$lib/utils/constants";
+import { teamSchema, type TeamDocType } from "$lib/models/team.model";
 import {
   environmentSchema,
   type EnvironmentDocType,
@@ -32,8 +33,13 @@ import {
   environmentTabSchema,
   type EnvironmentTabDocType,
 } from "$lib/models/environment-tab.model";
+import {
+  windowSettingsSchema,
+  type WindowSettingsDocType,
+} from "$lib/models/window-settings-model";
 // import { RxDBDevModePlugin } from "rxdb/plugins/dev-mode";
 // addRxPlugin(RxDBDevModePlugin);
+
 addRxPlugin(RxDBQueryBuilderPlugin);
 addRxPlugin(RxDBMigrationPlugin);
 addRxPlugin(RxDBUpdatePlugin);
@@ -41,6 +47,8 @@ export type WorkspaceDocument = RxDocument<WorkspaceDocType>;
 export type WorkspaceContainer = RxCollection<WorkspaceDocType>;
 export type CollectionContainer = RxCollection<CollectionDocType>;
 export type CollectionDocument = RxDocument<CollectionDocType>;
+export type TeamDocument = RxDocument<TeamDocType>;
+export type TeamContainer = RxCollection<TeamDocType>;
 export type EnvironmentContainer = RxCollection<EnvironmentDocType>;
 export type EnvironmentDocument = RxDocument<EnvironmentDocType>;
 export type EnvironmentTabContainer = RxCollection<EnvironmentTabDocType>;
@@ -51,6 +59,7 @@ export type TabDocument = RxDocument<TabDocType>;
 export type TabContainer = RxCollection<TabDocType>;
 export type ActiveSideBarTabDocument = RxDocument<ActiveSideBarTabDocType>;
 export type ActiveSideBarTabContainer = RxCollection<ActiveSideBarTabDocType>;
+export type WindowSettingsContainer = RxCollection<WindowSettingsDocType>;
 
 // collate all the Rx collections
 export type DatabaseCollections = {
@@ -59,6 +68,8 @@ export type DatabaseCollections = {
   collection: CollectionContainer;
   environment: EnvironmentContainer;
   activesidebartab: ActiveSideBarTabContainer;
+  windowSettings: WindowSettingsContainer;
+  team: TeamContainer;
 };
 
 // define the Rx database type
@@ -107,6 +118,12 @@ export class RxDB {
           5: function (oldDoc: TabDocument) {
             return oldDoc;
           },
+          6: function (oldDoc: TabDocument) {
+            return oldDoc;
+          },
+          7: function (oldDoc: TabDocument) {
+            return oldDoc;
+          },
         },
       },
       tab: {
@@ -132,6 +149,21 @@ export class RxDB {
       },
       activesidebartab: {
         schema: activeSideBarTabSchema,
+      },
+      windowsettings: {
+        schema: windowSettingsSchema,
+      },
+      team: {
+        schema: teamSchema,
+        migrationStrategies: {
+          //   // database  migration functions
+          1: function (oldDoc: TeamDocument) {
+            return oldDoc;
+          },
+          2: function (oldDoc: TeamDocument) {
+            return oldDoc;
+          },
+        },
       },
       environment: {
         schema: environmentSchema,

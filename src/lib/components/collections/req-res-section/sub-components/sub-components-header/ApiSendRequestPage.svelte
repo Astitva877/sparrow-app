@@ -21,6 +21,8 @@
   import type { NewTab } from "$lib/utils/interfaces/request.interface";
   import EnvironmentPicker from "../environment-picker/EnvironmentPicker.svelte";
   import { EnvironmentHeper } from "$lib/utils/helpers/environment.helper";
+  import MixpanelEvent from "$lib/utils/mixpanel/MixpanelEvent";
+  import { Events } from "$lib/utils/enums/mixpanel-events.enum";
 
   export const loaderColor = "default";
   export let activeTab;
@@ -105,42 +107,63 @@
           currentTabId,
         )
           .then((response) => {
-            let end = Date.now();
-            const byteLength = new TextEncoder().encode(
-              JSON.stringify(response),
-            ).length;
-            let responseSizeKB = byteLength / 1024;
-            let duration = end - start;
+            if (response.isSuccessful === false) {
+              collectionsMethods.updateRequestProperty(
+                false,
+                RequestProperty.REQUEST_IN_PROGRESS,
+                currentTabId,
+              );
+              collectionsMethods.updateRequestProperty(
+                {
+                  body: "",
+                  headers: "",
+                  status: "Not Found",
+                  time: 0,
+                  size: 0,
+                },
+                RequestProperty.RESPONSE,
+                currentTabId,
+              );
+              isLoading = false;
+            } else {
+              let end = Date.now();
+              const byteLength = new TextEncoder().encode(
+                JSON.stringify(response),
+              ).length;
+              let responseSizeKB = byteLength / 1024;
+              let duration = end - start;
 
-            let responseBody = response.data.response;
-            let responseHeaders = response.data.headers;
-            let responseStatus = response.data.status;
-            _apiSendRequest.setResponseContentType(
-              responseHeaders,
-              collectionsMethods,
-            );
-            collectionsMethods.updateRequestProperty(
-              false,
-              RequestProperty.REQUEST_IN_PROGRESS,
-              response.tabId,
-            );
-            collectionsMethods.updateRequestProperty(
-              {
-                body: responseBody,
-                headers: JSON.stringify(responseHeaders),
-                status: responseStatus,
-                time: duration,
-                size: responseSizeKB,
-              },
-              RequestProperty.RESPONSE,
-              response.tabId,
-            );
-            isLoading = false;
+              let responseBody = response.data.response;
+              let responseHeaders = response.data.headers;
+              let responseStatus = response.data.status;
+              _apiSendRequest.setResponseContentType(
+                responseHeaders,
+                collectionsMethods,
+              );
+              collectionsMethods.updateRequestProperty(
+                false,
+                RequestProperty.REQUEST_IN_PROGRESS,
+                response.tabId,
+              );
+              collectionsMethods.updateRequestProperty(
+                {
+                  body: responseBody,
+                  headers: JSON.stringify(responseHeaders),
+                  status: responseStatus,
+                  time: duration,
+                  size: responseSizeKB,
+                },
+                RequestProperty.RESPONSE,
+                response.tabId,
+              );
+              isLoading = false;
+            }
           })
           .catch((error) => {
             collectionsMethods.updateRequestProperty(
               false,
               RequestProperty.REQUEST_IN_PROGRESS,
+              currentTabId,
             );
             collectionsMethods.updateRequestProperty(
               {
@@ -151,6 +174,7 @@
                 size: 0,
               },
               RequestProperty.RESPONSE,
+              currentTabId,
             );
             isLoading = false;
           });
@@ -290,14 +314,14 @@
         type="text"
         id="input-request-url"
         placeholder="Enter URL or paste text"
-        class="form-control input-outline bg-blackColor border-0 p-3 rounded {isInputEmpty
+        class="url-input form-control input-outline border-0 p-3 rounded {isInputEmpty
           ? 'border-red'
           : ''}"
         autocomplete="off"
         spellcheck="false"
         autocorrect="off"
         autocapitalize="off"
-        style="width:{isCollaps ? '100%' : ''}; height:34px;font-size:14px;"
+        style="width:{isCollaps ? '100%' : ''}; height:34px;"
         bind:value={urlText}
         on:input={handleInputValue}
         on:keydown={(e) => handleKeyPress(e)}
@@ -378,6 +402,7 @@
             splitter.style.width = "100%";
             rightPanel.style.width = `${rightPanelWidth}%`;
             leftPanel.style.width = `${leftPanelWidth}%`;
+            MixpanelEvent(Events.CHANGE_DEFAULT_VIEW);
           }}
           class:view-active={selectedView === "horizontal"}
           src={barIcon}
@@ -392,12 +417,12 @@
 
 <style>
   .btn-primary {
-    background: var(--send-button);
+    background: var(--sparrow-blue);
   }
 
   .view-active {
-    filter: invert(78%) sepia(86%) saturate(3113%) hue-rotate(177deg)
-      brightness(100%) contrast(100%);
+    filter: invert(60%) sepia(99%) saturate(302%) hue-rotate(183deg)
+      brightness(102%) contrast(105%);
   }
 
   .btn-primary:hover {
@@ -423,5 +448,10 @@
 
   .input-outline:focus {
     outline: 2px solid var(--sparrow-blue);
+  }
+  .url-input {
+    background-color: var(--background-dark);
+    border: 1px solid #272727 !important;
+    font-size: 12px;
   }
 </style>

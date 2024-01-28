@@ -15,6 +15,8 @@
   import EnvironmentTab from "./sub-components/environment-tab/EnvironmentTab.svelte";
   import { generateSampleEnvironment } from "$lib/utils/sample/environment.sample";
   import { environmentType } from "$lib/utils/enums/environment.enum";
+  import MixpanelEvent from "$lib/utils/mixpanel/MixpanelEvent";
+  import { Events } from "$lib/utils/enums/mixpanel-events.enum";
 
   export let environmentRepositoryMethods: EnvironmentRepositoryMethods;
   export let environmentServiceMethods: EnvironmentServiceMethods;
@@ -110,6 +112,7 @@
     } else {
       notifications.error("Failed to create environment. Please try again.");
     }
+    MixpanelEvent(Events.CREATE_LOCAL_ENVIRONMENT);
     return;
   };
 
@@ -194,7 +197,7 @@
       </button>
     </div>
   {/if}
-  <ul class={`env-side-tab-list overflow-y-scroll px-2`}>
+  <ul class={`env-side-tab-list sparrow-thin-scrollbar overflow-y-scroll px-2`}>
     {#if localEnvironment && localEnvironment.length > 0}
       {#each localEnvironment as env}
         <EnvironmentTab
@@ -283,12 +286,7 @@
     overflow-y: scroll;
     height: 78vh;
   }
-  .env-side-tab-list::-webkit-scrollbar {
-    width: 2px;
-  }
-  .env-side-tab-list::-webkit-scrollbar-thumb {
-    background: #888;
-  }
+
   .show-more-btn {
     margin-right: 0;
     background-color: transparent;

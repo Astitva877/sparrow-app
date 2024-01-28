@@ -1,23 +1,531 @@
 <script lang="ts">
-  // import TeamsList from "$lib/components/teams/teams-list/TeamsList.svelte";
-  // import TeamsContent from "$lib/components/teams/teams-content/TeamsContent.svelte";
-  import { Motion } from "svelte-motion";
-  import UnderDevelopment from "../UnderDevelopment/UnderDevelopment.svelte";
+  import type { WorkspaceMethods } from "$lib/utils/interfaces/workspace.interface";
+
+  import type { Observable } from "rxjs";
+  import type { TeamDocument } from "$lib/database/app.database";
+  import type {
+    CollectionsMethods,
+    CurrentTeam,
+    TeamRepositoryMethods,
+    TeamServiceMethods,
+  } from "$lib/utils/interfaces";
+  import type { Path } from "$lib/utils/interfaces/request.interface";
+  import WorkspaceContent from "../../lib/components/workspace/WorkspaceContent.svelte";
+  import WorkspaceList from "../../lib/components/workspace/workspace-list/WorkspaceList.svelte";
+  import { TeamViewModel } from "./team.viewModel";
   import { scaleMotionProps } from "$lib/utils/animations";
+  import { Motion } from "svelte-motion";
+  import { user } from "$lib/store/auth.store";
+
+  import type { WorkspaceDocument } from "$lib/database/app.database";
+  import { openedTeam, setOpenedTeam } from "$lib/store/team.store";
+  import { isWorkspaceCreatedFirstTime, isWorkspaceLoaded } from "$lib/store";
+  import { generateSampleWorkspace } from "$lib/utils/sample/workspace.sample";
+  import { UntrackedItems } from "$lib/utils/enums/item-type.enum";
+  import { onDestroy, onMount } from "svelte";
+  import { isTeamCreatedFirstTime } from "$lib/store/team.store";
+  import {} from "$lib/store";
+  import { generateSamepleTeam } from "$lib/utils/sample";
+  import { moveNavigation } from "$lib/utils/helpers";
+  import { navigate } from "svelte-navigator";
+  import { notifications } from "$lib/utils/notifications";
+  import { HeaderDashboardViewModel } from "$lib/components/header/header-dashboard/HeaderDashboard.ViewModel";
+  import {
+    ParaInput,
+    FileInput,
+    TextInput,
+    CustomPopup,
+  } from "$lib/components";
+  import { v4 as uuidv4 } from "uuid";
+
+  export let data: any;
+  export let handleWorkspaceSwitch: any;
+  export let handleWorkspaceTab: any;
+  export let activeSideBarTabMethods: any;
+  export let collectionsMethods: CollectionsMethods;
+  export let currentTeam: CurrentTeam;
+
+  let allTeams: any[] = [];
+  let userId: string | undefined = undefined;
+  let currOpenedTeam: CurrentTeam;
+  let activeTeamRxDoc: TeamDocument;
+  let workspaceUnderCreation: boolean = false;
+  let teamUnderCreation: boolean = false;
+  let isCreateTeamModalOpen: boolean;
+  let isShowMoreVisible: boolean = false;
+  let openLeaveTeamModal: boolean = false;
+  let isLeavingTeam: boolean = false;
+
+  let newTeam: {
+    name: {
+      value: string;
+      invalid: boolean;
+    };
+    description: {
+      value: string;
+      invalid: boolean;
+    };
+    file: {
+      value: any;
+      invalid: boolean;
+      showFileTypeError: boolean;
+      showFileSizeError: boolean;
+    };
+  };
+
+  const _viewModel = new TeamViewModel();
+  const _viewModelWorkspace = new HeaderDashboardViewModel();
+  const teams: Observable<TeamDocument[]> = _viewModel.teams;
+  const activeTeam: Observable<TeamDocument> = _viewModel.activeTeam;
+  const openTeam: Observable<TeamDocument> = _viewModel.openTeam;
+  const workspaces: Observable<WorkspaceDocument[]> = _viewModel.workspaces;
+  const tabList = _viewModel.tabs;
+  const collectionList = _viewModel.collection;
+
+  const workspaceMethods: WorkspaceMethods = {
+    handleCreateTab: _viewModel.handleCreateTab,
+  };
+  const teamRepositoryMethods: TeamRepositoryMethods = {
+    modifyTeam: _viewModel.modifyTeam,
+    setOpenTeam: _viewModel.setOpenTeam,
+    getTeam: _viewModel.getTeam,
+  };
+  const teamServiceMethods: TeamServiceMethods = {
+    inviteMembersAtTeam: _viewModel.inviteMembersAtTeam,
+    removeMembersAtTeam: _viewModel.removeMembersAtTeam,
+    promoteToAdminAtTeam: _viewModel.promoteToAdminAtTeam,
+    demoteToMemberAtTeam: _viewModel.demoteToMemberAtTeam,
+    promoteToOwnerAtTeam: _viewModel.promoteToOwnerAtTeam,
+    refreshWorkspace: _viewModelWorkspace.refreshWorkspaces,
+    changeUserRoleAtWorkspace: _viewModel.changeUserRoleAtWorkspace,
+    removeUserFromWorkspace: _viewModel.removeUserFromWorkspace,
+  };
+
+  const userSubscribe = user.subscribe(async (value) => {
+    if (value) {
+      userId = value._id;
+    }
+  });
+
+  const openedTeamSubscribe = openedTeam.subscribe((value) => {
+    if (value) {
+      currOpenedTeam = value;
+    }
+  });
+
+  const activeTeamSubscribe = activeTeam.subscribe((value: TeamDocument) => {
+    if (value) {
+      activeTeamRxDoc = value;
+      setOpenedTeam(
+        currOpenedTeam.id ? currOpenedTeam.id : value.get("teamId"),
+        currOpenedTeam.name ? currOpenedTeam.name : value.get("name"),
+        currOpenedTeam.base64String
+          ? currOpenedTeam.base64String
+          : value.get("logo"),
+      );
+    }
+  });
+
+  const isWorkspaceLoadedSubscribe = isWorkspaceLoaded.subscribe(
+    (value: boolean) => {
+      workspaceUnderCreation = value;
+    },
+  );
+
+  const teamSubscribe = teams.subscribe((value: TeamDocument[]) => {
+    if (value && value.length > 0) {
+      const teamArr = value.map((teamDocument: TeamDocument) => {
+        const teamObj = _viewModel.getTeamDocument(teamDocument);
+        return teamObj;
+      });
+      allTeams = teamArr;
+    }
+  });
+
+  const handleCreateWorkspace = async () => {
+    isWorkspaceCreatedFirstTime.set(true);
+    isWorkspaceLoaded.set(false);
+    const workspaceObj = generateSampleWorkspace(
+      UntrackedItems.UNTRACKED + uuidv4(),
+      new Date().toISOString(),
+      undefined,
+      currOpenedTeam.id,
+    );
+
+    const workspaceData = {
+      name: workspaceObj.name,
+      id: currOpenedTeam.id,
+      createdAt: workspaceObj.createdAt,
+    };
+
+    await _viewModel.addWorkspace(workspaceObj);
+
+    const response = await _viewModel.createWorkspace(workspaceData);
+
+    if (response.isSuccessful) {
+      let totalCollection: number = 0;
+      let totalRequest: number = 0;
+
+      $data.map((item) => {
+        if (item) {
+          if (item._data._id === response.data.data._id) {
+            // totalCollection = item?._data?.collections?.length;
+            totalCollection = 0;
+          } else {
+            totalRequest = 0;
+          }
+        }
+      });
+
+      let path: Path = {
+        workspaceId: response.data.data._id,
+        collectionId: "",
+      };
+
+      workspaceObj._id = response.data.data._id;
+      workspaceObj.name = response.data.data.name;
+      workspaceObj.description = response.data.data?.description;
+      workspaceObj.team = {
+        teamId: response.data.data?.team?.id,
+        teamName: response?.data?.data?.team?.teamName,
+      };
+      workspaceObj.owner = response.data.data?.owner;
+      workspaceObj.users = response.data.data?.users;
+      workspaceObj.createdAt = response.data.data?.createdAt;
+      workspaceObj.createdBy = response.data.data?.createdBy;
+      workspaceObj.isActiveWorkspace = false;
+      workspaceObj.environments = response.data.data?.environemnts;
+      workspaceObj.path = path;
+      workspaceObj.property.workspace.requestCount = totalRequest;
+      workspaceObj.property.workspace.collectionCount = 0;
+      workspaceObj.save = true;
+      // await _viewModelWorkspace.addWorkspace(workspaceObj);
+      if (userId) await _viewModel.refreshTeams(userId);
+      if (userId) await _viewModelWorkspace.refreshWorkspaces(userId);
+      await _viewModelWorkspace.activateWorkspace(workspaceObj._id);
+      collectionsMethods.handleCreateTab(workspaceObj);
+      collectionsMethods.handleActiveTab(workspaceObj._id);
+      moveNavigation("right");
+      isWorkspaceCreatedFirstTime.set(true);
+      notifications.success("New Workspace Created");
+      isWorkspaceLoaded.set(true);
+      navigate("/dashboard/collections");
+      activeSideBarTabMethods.updateActiveTab("collections");
+    } else {
+      await _viewModelWorkspace.removeWorkspace(workspaceObj._id);
+      isWorkspaceLoaded.set(true);
+      notifications.error("Failed to create new Workspace!");
+    }
+  };
+
+  const handleCreateTeam = async (
+    name: string,
+    description: string,
+    file: File,
+  ) => {
+    if (name == "") {
+      newTeam.name.invalid = true;
+      return;
+    }
+    if (newTeam.file.showFileSizeError || newTeam.file.showFileTypeError)
+      return;
+
+    teamUnderCreation = true;
+    isTeamCreatedFirstTime.set(true);
+    const teamObj = generateSamepleTeam(name, description, file, userId);
+
+    await _viewModel.addTeam(teamObj);
+    const response = await _viewModel.createTeam(teamObj);
+
+    if (response.isSuccessful && response.data.data) {
+      const res = response.data.data;
+      await _viewModel.refreshTeams(userId);
+      setOpenedTeam(
+        response.data.data?._id,
+        response?.data?.data?.name,
+        response?.data?.data?.logo,
+      );
+      notifications.success(`New team ${teamObj.name} is created.`);
+      handleCreateTeamModal();
+      teamUnderCreation = false;
+    } else {
+      await _viewModel.leaveTeam(teamObj.teamId);
+      teamUnderCreation = false;
+      handleCreateTeamModal();
+      notifications.error("Failed to create a new team.");
+    }
+  };
+
+  const handleLeaveTeam = async () => {
+    if (!currOpenedTeam?.id) return;
+    isLeavingTeam = true;
+    const response = await _viewModel.leaveTeam(currOpenedTeam.id);
+    if (response.isSuccessful) {
+      await _viewModel.refreshTeams(userId);
+      await _viewModelWorkspace.refreshWorkspaces(userId);
+      notifications.success("You left a team.");
+      setOpenedTeam(
+        activeTeamRxDoc?._data?.teamId,
+        activeTeamRxDoc?._data?.name,
+        //@ts-ignore
+        activeTeamRxDoc?._data?.logo,
+      );
+      isShowMoreVisible = false;
+      isLeavingTeam = false;
+      handleLeaveTeamModal();
+    } else {
+      notifications.error("Failed to leave the team. Please try again.");
+      isShowMoreVisible = false;
+      isLeavingTeam = false;
+      handleLeaveTeamModal();
+    }
+  };
+
+  const handleCreateTeamModal = () => {
+    isCreateTeamModalOpen = !isCreateTeamModalOpen;
+    newTeam = {
+      name: {
+        value: "",
+        invalid: false,
+      },
+      description: {
+        value: "",
+        invalid: false,
+      },
+      file: {
+        value: [],
+        invalid: false,
+        showFileSizeError: false,
+        showFileTypeError: false,
+      },
+    };
+  };
+
+  const handleTeamNameChange = (e: any) => {
+    if (e.target.value !== "") {
+      newTeam.name.invalid = false;
+    }
+    newTeam.name.value = e.target.value;
+  };
+
+  const handleTeamDescChange = (e: any) => {
+    newTeam.description.value = e.target.value;
+  };
+
+  const handleLogoInputChange = (
+    e: any,
+    maxSize: number,
+    supportedFileTypes: string[],
+  ) => {
+    if (
+      (e?.target?.files && e?.target?.files[0].size > maxSize * 1024) ||
+      (e?.dataTransfer?.files &&
+        e?.dataTransfer?.files[0].size > maxSize * 1024)
+    ) {
+      newTeam.file.showFileSizeError = true;
+      newTeam.file.invalid = true;
+      return;
+    }
+    const fileType = `.${(
+      (e?.target?.files && e?.target?.files[0]?.name) ||
+      (e?.dataTransfer?.files && e?.dataTransfer?.files[0]?.name)
+    )
+      .split(".")
+      .pop()
+      .toLowerCase()}`;
+    if (!supportedFileTypes.includes(fileType)) {
+      newTeam.file.showFileTypeError = true;
+      newTeam.file.invalid = true;
+      return;
+    }
+    newTeam.file.showFileSizeError = false;
+    newTeam.file.showFileTypeError = false;
+    newTeam.file.invalid = false;
+    newTeam.file.value =
+      (e?.target?.files && e?.target?.files[0]) ||
+      (e?.dataTransfer?.files && e?.dataTransfer?.files[0]);
+  };
+
+  const handleLogoReset = (e: any) => {
+    newTeam.file.value = [];
+  };
+
+  const handleLogoEdit = (e: any) => {
+    const fileInput = document.getElementById("team-file-input");
+    fileInput.click();
+  };
+
+  const handleOnShowMoreClick = (e) => {
+    e.stopPropagation();
+    isShowMoreVisible = !isShowMoreVisible;
+  };
+
+  const handleCloseShowMoreClick = (e) => {
+    if (!isShowMoreVisible) isShowMoreVisible = !isShowMoreVisible;
+  };
+
+  const handleLeaveTeamModal = () => {
+    openLeaveTeamModal = !openLeaveTeamModal;
+  };
+
+  onMount(() => {
+    newTeam = {
+      name: {
+        value: "",
+        invalid: false,
+      },
+      description: {
+        value: "",
+        invalid: false,
+      },
+      file: {
+        value: [],
+        invalid: false,
+        showFileSizeError: false,
+        showFileTypeError: false,
+      },
+    };
+  });
+
+  onDestroy(() => {
+    userSubscribe();
+    openedTeamSubscribe();
+    isWorkspaceLoadedSubscribe();
+    teamSubscribe.unsubscribe();
+    activeTeamSubscribe.unsubscribe();
+  });
 </script>
 
+<svelte:window
+  on:click={(e) => {
+    handleCloseShowMoreClick(e);
+  }}
+  on:contextmenu|preventDefault={(e) => {
+    handleCloseShowMoreClick(e);
+  }}
+/>
+<!-- Create New Team POP UP -->
+<CustomPopup
+  isOpen={isCreateTeamModalOpen}
+  title={"New Team"}
+  underSubmission={teamUnderCreation}
+  btnText={"Create Team"}
+  handleOpen={handleCreateTeamModal}
+  handleSubmit={() =>
+    handleCreateTeam(
+      newTeam.name.value,
+      newTeam.description.value,
+      newTeam.file.value,
+    )}
+>
+  <TextInput
+    value={newTeam.name.value}
+    labelText="Team or Organization name"
+    inputId="team-name-input"
+    inputPlaceholder="Please enter your team name"
+    isRequired={true}
+    onChange={handleTeamNameChange}
+    invalidValue={newTeam.name.invalid}
+    errorText={"Team name cannot be empty."}
+  />
+  <ParaInput
+    maxCharacter={500}
+    value={newTeam.description.value}
+    labelText="About"
+    labelDescription={newTeam.description.value !== ""
+      ? `${Math.max(0, 500 - newTeam.description.value.length)} characters left`
+      : "max: 500 characters"}
+    inputId="team-desc-input"
+    inputPlaceholder="Write a little about your team"
+    onChange={handleTeamDescChange}
+  />
+  <FileInput
+    value={newTeam.file.value}
+    maxFileSize={100}
+    onChange={handleLogoInputChange}
+    resetValue={handleLogoReset}
+    editValue={handleLogoEdit}
+    labelText="Logo"
+    labelDescription="Drag and drop your image. We recommend that you upload an image with square aspect ratio.The image size should not be more than 100 KB. Supported formats are .jpg, .jpeg, .png "
+    inputId="team-file-input"
+    inputPlaceholder="Drag and Drop or"
+    isRequired={false}
+    supportedFileTypes={[".png", ".jpg", ".jpeg"]}
+    showFileSizeError={newTeam.file.showFileSizeError}
+    showFileTypeError={newTeam.file.showFileTypeError}
+    fileTypeError="This file type is not supported. Please reupload in any of the following file formats."
+    fileSizeError="The size of the file you are trying to upload is more than 100 KB."
+  />
+</CustomPopup>
+
+<!-- Leave Team POP UP -->
+<CustomPopup
+  isOpen={openLeaveTeamModal}
+  title="Leave Team?"
+  underSubmission={isLeavingTeam}
+  isDanger={true}
+  btnText="Leave"
+  handleOpen={handleLeaveTeamModal}
+  handleSubmit={handleLeaveTeam}
+>
+  <p class="warning-text text-lightGray mt-3">
+    Are you sure you want to leave team <span class="fw-semibold"
+      >"{currOpenedTeam?.name}"</span
+    >? You will lose access to all the resources in this team.
+  </p>
+</CustomPopup>
+
 <Motion {...scaleMotionProps} let:motion>
-  <div class="d-flex" use:motion>
-    <!-- <TeamsList /> -->
-    <!-- <TeamsContent /> -->
-    <UnderDevelopment
-      heading="Teams"
-      description="Elevating team collaboration seamlessly by leveraging features that streamline onboarding, foster team discovery, and facilitate shared workspace for enhanced cooperation on API projects."
-      subHeading="Teams is set to provide you the power of:"
-      subSubHeadingOne="Unified Collaboration Interface"
-      subSubDescOne="Enhanced teamwork efficiency with centralized interface, fostering seamless collaboration on API projects through discussions, comments, and shared workspaces for request, versions, schemas and scripts. "
-      subSubHeadingTwo="Multi-team Collaboration Flexibility"
-      subSubDescTwo="Seamlessly create, join, and switch between teams, empowering users to manage diverse projects effortlessly across various structures. "
+  <div class="workspace bg -backgroundColor" use:motion>
+    <WorkspaceList
+      {handleCreateTeamModal}
+      teams={allTeams}
+      {data}
+      tabList={$tabList}
+      collectionList={$collectionList}
+      {handleWorkspaceSwitch}
+      {handleWorkspaceTab}
+      {activeSideBarTabMethods}
+      {teamRepositoryMethods}
+      {collectionsMethods}
+    />
+    <WorkspaceContent
+      {currentTeam}
+      {userId}
+      {handleCreateWorkspace}
+      {handleWorkspaceSwitch}
+      {handleWorkspaceTab}
+      {data}
+      {activeSideBarTabMethods}
+      {isShowMoreVisible}
+      {handleLeaveTeamModal}
+      {handleOnShowMoreClick}
+      openTeam={$openTeam}
+      {teamServiceMethods}
+      {teamRepositoryMethods}
+      workspaces={$workspaces}
     />
   </div>
 </Motion>
+
+<style>
+  .workspace {
+    font-size: 12px;
+    display: flex;
+    height: calc(100vh - 44px);
+    overflow: hidden;
+  }
+  .workspace::-webkit-scrollbar {
+    width: 2px;
+  }
+  .workspace::-webkit-scrollbar-thumb {
+    background: #888;
+  }
+
+  .warning-text {
+    color: var(--colors-neutral-text-3, #ccc);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 150%;
+  }
+</style>

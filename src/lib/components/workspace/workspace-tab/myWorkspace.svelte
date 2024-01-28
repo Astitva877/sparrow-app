@@ -92,7 +92,7 @@
   const activeWorkspaceSubscribe = activeWorkspace.subscribe(
     (value: WorkspaceDocument) => {
       if (value) {
-        ownerName = value._data.owner.name;
+        ownerName = value._data?.owner?.name;
         if (ownerName) {
           name = ownerName;
           firstLetter = name[0];
@@ -180,6 +180,12 @@
         id="updateDescriptionFieldWorkspace"
         {autofocus}
         class="form-control bg-backgroundColor border-0 text-textColor fs-6 h-50 input-outline"
+        on:input={(event) => {
+          handleWorkspaceDescription(event);
+        }}
+        on:blur={onUpdateBlur}
+        on:keydown={onUpdateWorkspaceDescription}
+        bind:this={inputElement}
         placeholder="This is your personal workspace.Start typing. Describe the objectives of the workspace and how it is meant to be used.  Or create a comprehensive API documentation by including links to your collections and requests."
       />
     </div>

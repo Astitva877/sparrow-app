@@ -2,7 +2,7 @@
   import Collection from "$lib/components/file-types/collection/Collection.svelte";
   import Folder from "$lib/components/file-types/folder/Folder.svelte";
   import Request from "$lib/components/file-types/request/Request.svelte";
-  import { fade, fly, slide } from "svelte/transition";
+  import { fade, fly } from "svelte/transition";
   import { onDestroy, onMount } from "svelte";
   import { ItemType } from "$lib/utils/enums/item-type.enum";
   import collectionAsset from "$lib/assets/collection.svg";
@@ -10,8 +10,7 @@
   import folderAsset from "$lib/assets/folder.svg";
   import leftArrowAsset from "$lib/assets/angleLeft.svg";
   import crossAsset from "$lib/assets/close.svg";
-  import IconButton from "$lib/components/buttons/IconButton.svelte";
-  import CoverButton from "$lib/components/buttons/CoverButton.svelte";
+  import CustomButton from "$lib/components/buttons/CustomButton.svelte";
   import {
     insertCollection,
     insertCollectionDirectory,
@@ -33,6 +32,9 @@
   import crossIcon from "$lib/assets/cross-grey.svg";
   import Spinner from "$lib/components/Transition/Spinner.svelte";
   import questionIcon from "$lib/assets/question.svg";
+  import MixpanelEvent from "$lib/utils/mixpanel/MixpanelEvent";
+  import { Events } from "$lib/utils/enums/mixpanel-events.enum";
+  import TextButton from "$lib/components/buttons/TextButton.svelte";
 
   export let collectionsMethods: CollectionsMethods;
   export let onClick;
@@ -355,6 +357,7 @@
           isLoading = false;
         }
       }
+      MixpanelEvent(Events.SAVE_API_REQUEST);
     }
   };
 
@@ -403,6 +406,11 @@
       storage.id = _id;
       collectionsMethods.addCollection(storage);
       notifications.success("New Collection Created");
+      MixpanelEvent(Events.CREATE_COLLECTION, {
+        source: "SaveRequest",
+        collectionName: res.data.data.name,
+        collectionId: res.data.data._id,
+      });
     } else {
       createDirectoryLoader = false;
     }
@@ -780,9 +788,9 @@
                     Collection to easily organize and use your API requests.
                   </p>
                   <div class="w-100 d-flex justify-content-center">
-                    <CoverButton
+                    <CustomButton
                       text={"+ Collection"}
-                      size={14}
+                      fontSize={14}
                       type={"primary"}
                       onClick={() => {
                         createCollectionNameVisibility = true;
@@ -937,14 +945,14 @@
     <div class="controllers mt-3 d-flex justify-content-between">
       <div>
         {#if path.length === 0}
-          <IconButton
+          <TextButton
             text={"+ Collection"}
             onClick={() => {
               createCollectionNameVisibility = true;
             }}
           />
         {:else if path.length > 0 && path[path.length - 1].type === ItemType.COLLECTION}
-          <IconButton
+          <TextButton
             text={"+ Folder"}
             onClick={() => {
               createFolderNameVisibility = true;
@@ -954,19 +962,19 @@
       </div>
       <div class="d-flex">
         <span class="mx-2">
-          <CoverButton
+          <CustomButton
             text={"Cancel"}
-            size={16}
+            fontSize={16}
             type={"dark"}
             onClick={() => {
               onClick(false);
             }}
           />
         </span>
-        <CoverButton
+        <CustomButton
           disable={path.length > 0 ? (tabName.length > 0 ? false : true) : true}
           text={"Save"}
-          size={16}
+          fontSize={16}
           type={"primary"}
           loader={isLoading}
           onClick={() => {
@@ -987,6 +995,7 @@
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.7);
     z-index: 9;
+    -webkit-backdrop-filter: blur(3px);
     backdrop-filter: blur(3px);
   }
   .save-request {

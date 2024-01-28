@@ -1,6 +1,6 @@
 <script lang="ts">
   import crossAsset from "$lib/assets/close.svg";
-  import CoverButton from "$lib/components/buttons/CoverButton.svelte";
+  import CustomButton from "$lib/components/buttons/CustomButton.svelte";
   import { updateCollectionRequest } from "$lib/services/collection";
   import { ItemType } from "$lib/utils/enums/item-type.enum";
   import { fade, fly } from "svelte/transition";
@@ -24,17 +24,17 @@
     loader = true;
     const { folderId, folderName, collectionId, workspaceId } =
       componentData.path;
-      const bodyType =
-    componentData.property.request.state.dataset === RequestDataset.RAW
-          ? componentData.property.request.state.raw
-          : componentData.property.request.state.dataset;
+    const bodyType =
+      componentData.property.request.state.dataset === RequestDataset.RAW
+        ? componentData.property.request.state.raw
+        : componentData.property.request.state.dataset;
     const expectedRequest: RequestBody = {
       method: componentData.property.request.method,
       url: componentData.property.request.url,
       body: componentData.property.request.body,
       headers: componentData.property.request.headers,
       queryParams: componentData.property.request.queryParams,
-      selectedRequestBodyType:setContentTypeHeader(bodyType),
+      selectedRequestBodyType: setContentTypeHeader(bodyType),
     };
 
     if (!folderId) {
@@ -128,9 +128,9 @@
     </div>
     <div class="d-flex justify-content-between">
       <div>
-        <CoverButton
+        <CustomButton
           text={"Cancel"}
-          size={16}
+          fontSize={16}
           type={"dark"}
           onClick={() => {
             closeCallback(false);
@@ -139,9 +139,9 @@
       </div>
       <div class="d-flex">
         <span style="margin-right: 15px;">
-          <CoverButton
+          <CustomButton
             text={"Discard Changes"}
-            size={16}
+            fontSize={16}
             type={"dark"}
             onClick={() => {
               collectionsMethods.handleRemoveTab(componentData.id);
@@ -149,9 +149,9 @@
             }}
           />
         </span>
-        <CoverButton
+        <CustomButton
           text={"Save Changes"}
-          size={16}
+          fontSize={16}
           type={"primary"}
           {loader}
           onClick={() => {
@@ -180,6 +180,7 @@
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.7);
     z-index: 9;
+    -webkit-backdrop-filter: blur(3px);
     backdrop-filter: blur(3px);
   }
   .close-request {

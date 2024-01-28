@@ -255,7 +255,7 @@
           class="team-menu__link d-flex pb-1"
           class:tab-active={selectedTab === RequestSection.REQUEST_BODY}
         >
-          Body
+          Request Body
         </span>
       </span>
 
@@ -376,7 +376,7 @@
   .tab-active {
     color: white;
 
-    border-bottom: 3px solid #85c2ff;
+    border-bottom: 3px solid var(--send-button);
   }
   .cursor-pointer {
     cursor: pointer;
