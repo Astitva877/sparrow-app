@@ -197,6 +197,7 @@ export class WorkspaceRepository {
       if (data.updatedAt) value.updatedAt = data.updatedAt;
       if (data.updatedBy) value.updatedBy = data.updatedBy;
       if (data.createdBy) value.createdBy = data.createdBy;
+      if (data?.isNewInvite) value.isNewInvite = data?.isNewInvite;
       return value;
     });
   };

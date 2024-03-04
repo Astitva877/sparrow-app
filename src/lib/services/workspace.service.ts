@@ -124,4 +124,18 @@ export class WorkspaceService {
     );
     return response;
   };
+
+  public disableWorkspaceNewInviteTag = async (
+    userId: string,
+    workspaceId: string,
+  ) => {
+    const response: MakeRequestResponse = await makeRequest(
+      "GET",
+      `${apiUrl}/api/workspace/${workspaceId}/user/${userId}/disableWorkspaceNewInvite`,
+      {
+        headers: getAuthHeaders(),
+      },
+    );
+    return response;
+  };
 }

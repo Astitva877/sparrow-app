@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { ThreeDotIcon } from "$lib/assets/app.asset";
   import UserProfileList from "$lib/components/profile/UserProfileList.svelte";
   import RightOption from "$lib/components/right-click-menu/RightClickMenuView.svelte";
@@ -10,6 +10,10 @@
   export let calculateTimeDifferenceInDays;
   export let WorkspaceMemberRole;
   export let userType = "";
+  export let userId = "";
+  export let handleWorkspaceInvite: (e: string, p: string) => void;
+  console.log("listpg", list);
+  console.log("list", list?._data?.isNewInvite, list?.name);
 
   let pos = { x: 0, y: 0 };
   let showMenu = false;
@@ -92,11 +96,14 @@
     on:click={(e) => {
       e.stopPropagation();
       handleOpenCollection(list);
+      console.log("clickedokk");
+      handleWorkspaceInvite(userId, list?.id);
     }}
     style="max-width: 15vw; padding-right: 10px;"
     class="tab-data rounded-start py-3 overflow-hidden ellipsis"
-    >{list?.name}</td
-  >
+    >{list?.name}
+    {list?._data?.isNewInvite === true ? "New" : ""}
+  </td>
 
   <td
     on:click={(e) => {

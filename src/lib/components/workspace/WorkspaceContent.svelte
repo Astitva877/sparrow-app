@@ -33,6 +33,7 @@
   export let handleLeaveTeamModal: () => void;
   export let handleOnShowMoreClick: () => void;
   export let handleCloseShowMoreClick: () => void;
+  export let handleWorkspaceInvite: (e: string, p: string) => void;
   export let isShowMoreVisible: boolean = false;
   export let workspaceUnderCreation = false;
 
@@ -291,6 +292,7 @@
         {activeSideBarTabMethods}
         {openTeam}
         {userType}
+        {handleWorkspaceInvite}
       />
     {:else if selectedView == "GRID" && selectedTab == "all-workspace"}
       <WorkspaceCardList

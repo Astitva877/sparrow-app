@@ -26,6 +26,8 @@
   export let handleWorkspaceTab: any;
   export let userType = "";
   export let openTeam: Team;
+  export let handleWorkspaceInvite: (e: string, p: string) => void;
+  console.log("data", data);
 
   let isShowMoreVisible = undefined;
   let workspacePerPage: number = 10,
@@ -164,6 +166,8 @@
                 {calculateTimeDifferenceInDays}
                 {WorkspaceMemberRole}
                 {userType}
+                {userId}
+                {handleWorkspaceInvite}
               />
             {/each}
           {/if}

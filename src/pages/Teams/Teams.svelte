@@ -55,6 +55,7 @@
   let isShowMoreVisible: boolean = false;
   let openLeaveTeamModal: boolean = false;
   let isLeavingTeam: boolean = false;
+  let allworkspaces: any[] = [];
 
   let newTeam: {
     name: {
@@ -143,6 +144,21 @@
       allTeams = teamArr;
     }
   });
+
+  const workspaceSubscribe = workspaces.subscribe(
+    (value: WorkspaceDocument[]) => {
+      if (value && value.length > 0) {
+        const workspaceArr = value.map(
+          (workspaceDocument: WorkspaceDocument) => {
+            const workspaceObj =
+              _viewModel.getWorkspaceDocument(workspaceDocument);
+            return workspaceObj;
+          },
+        );
+        allworkspaces = workspaceArr;
+      }
+    },
+  );
 
   const handleCreateWorkspace = async () => {
     workspaceUnderCreation = true;
@@ -356,6 +372,11 @@
       (e?.dataTransfer?.files && e?.dataTransfer?.files[0]);
   };
 
+  const handleWorkspaceInvite = (userId: string, workspaceId: string) => {
+    console.log("inside invite", workspaceId, userId);
+    const data = _viewModel.disableWorkspaceNewInviteTag(userId, workspaceId);
+  };
+
   const handleLogoReset = (e: any) => {
     newTeam.file.value = [];
   };
@@ -399,6 +420,7 @@
   onDestroy(() => {
     userSubscribe();
     teamSubscribe.unsubscribe();
+    workspaceSubscribe.unsubscribe();
     activeTeamSubscribe.unsubscribe();
   });
   let teamUnderSubmission: boolean = false;
@@ -568,6 +590,7 @@
       {teamServiceMethods}
       {teamRepositoryMethods}
       workspaces={$workspaces}
+      {handleWorkspaceInvite}
     />
   </div>
 </Motion>

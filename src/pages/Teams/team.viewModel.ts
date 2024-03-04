@@ -10,7 +10,10 @@ import { TabRepository } from "$lib/repositories/tab.repository";
 import { CollectionRepository } from "$lib/repositories/collection.repository";
 import { TeamService } from "$lib/services/team.service";
 import { TeamRepository } from "$lib/repositories/team.repository";
-import type { TeamDocument } from "$lib/database/app.database";
+import type {
+  TeamDocument,
+  WorkspaceDocument,
+} from "$lib/database/app.database";
 import type { Observable } from "rxjs";
 import type { InviteBody } from "$lib/utils/dto/team-dto";
 import type { TeamRole, WorkspaceRole } from "$lib/utils/enums";
@@ -165,6 +168,22 @@ export class TeamViewModel {
     };
   };
 
+  public getWorkspaceDocument = (elem: WorkspaceDocument) => {
+    return {
+      admins: elem.get("admins"),
+      collections: elem.get("colllections"),
+      createdAt: elem.get("createdAt"),
+      createdBy: elem.get("createdBy"),
+      description: elem.get("description"),
+      environmentId: elem.get("environmentId"),
+      isActiveWorkspace: elem.get("isActiveWorkspace"),
+      name: elem.get("name"),
+      team: elem.get("team"),
+      users: elem.get("users"),
+      isNewInvite: elem.get("isNewInvite"),
+    };
+  };
+
   public handleCreateTab = (data) => {
     requestResponseStore.createTab(data);
     this.debouncedTab();
@@ -313,6 +332,25 @@ export class TeamViewModel {
       body,
     );
     if (response.isSuccessful === true) {
+      return response.data.data;
+    }
+    return;
+  };
+
+  public disableWorkspaceNewInviteTag = async (
+    userId: string,
+    workspaceId: string,
+  ) => {
+    const response: MakeRequestResponse =
+      await this.workspaceService.disableWorkspaceNewInviteTag(
+        userId,
+        workspaceId,
+      );
+    if (response.isSuccessful === true) {
+      await this.workspaceRepository.updateWorkspace(
+        workspaceId,
+        response.data.data,
+      );
       return response.data.data;
     }
     return;
