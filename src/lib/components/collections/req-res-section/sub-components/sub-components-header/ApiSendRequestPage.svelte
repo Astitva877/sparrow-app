@@ -326,8 +326,9 @@
     }
     if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
       if (!disabledSend) handleSendRequest();
-    } else if (event.altKey && event.code === "KeyL") {
+    } else if (event.ctrlKey && event.code === "KeyL") {
       inputElement?.focus();
+      console.log("clicked");
     }
   };
 

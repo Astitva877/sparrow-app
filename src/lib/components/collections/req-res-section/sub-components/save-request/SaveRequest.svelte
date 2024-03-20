@@ -36,6 +36,7 @@
     dos,
     donts,
   } from "$lib/utils/constants/request.constant";
+  import { RequestDefault } from "$lib/utils/enums";
 
   export let collectionsMethods: CollectionsMethods;
   export let onClick;
@@ -75,11 +76,25 @@
   let tabName: string;
   let description: string;
   if (!componentData.path.workspaceId && !componentData.path.collectionId) {
-    tabName = componentData.name;
-    description = componentData.description;
+    if (
+      componentData.name !== RequestDefault.NAME ||
+      componentData.property.request?.url === ""
+    ) {
+      tabName = componentData.name;
+      description = componentData.description;
+    } else {
+      tabName = componentData.property.request?.url ?? componentData.name;
+      description = componentData.description;
+    }
   } else {
-    tabName = componentData.name + " Copy";
-    description = componentData.description + " Copy";
+    if (componentData.property.request?.url !== "") {
+      tabName =
+        componentData.property.request?.url ?? componentData.name + " Copy";
+      description = componentData.description + " Copy";
+    } else {
+      tabName = componentData.name + " Copy";
+      description = componentData.description + " Copy";
+    }
   }
   let latestRoute: {
     id: string;
