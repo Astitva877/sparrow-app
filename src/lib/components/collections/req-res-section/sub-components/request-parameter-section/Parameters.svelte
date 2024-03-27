@@ -22,6 +22,7 @@
   };
   let controller: boolean = false;
   const environmentHelper = new EnvironmentHeper();
+  let isParamMessageVisible = false;
 
   let trackParanthesis: unknown[] = [];
   let trackCursor: number;
@@ -72,6 +73,19 @@
     authValue = findAuthParameter(request);
   });
 
+  // const checkParamsExist = () => {
+  //   params.forEach((elem) => {
+  //     if (
+  //       elem.key.includes("&") ||
+  //       elem.value.includes("&") ||
+  //       elem.key.includes("=") ||
+  //       elem.value.includes("=")
+  //     ) {
+  //       isParamMessageVisible = true;
+  //     }
+  //   });
+  // };
+
   const extractQueryParamstoURL = (params: KeyValuePair[]) => {
     let response = "";
     let urlString: string = "";
@@ -101,6 +115,15 @@
 
   const updateParam = (index) => {
     params.forEach((elem, i) => {
+      if (elem.key.includes("&")) {
+        elem.key = elem.key.replace("&", encodeURIComponent("&"));
+      } else if (elem.value.includes("&")) {
+        elem.value = elem.value.replace("&", encodeURIComponent("&"));
+      } else if (elem.key.includes("=")) {
+        elem.key = elem.key.replace("=", encodeURIComponent("="));
+      } else if (elem.value.includes("=")) {
+        elem.value = elem.value.replace("=", encodeURIComponent("="));
+      }
       if (i == index) {
         elem.checked = true;
       }
@@ -110,11 +133,13 @@
       params.push({ key: "", value: "", checked: false });
       params = params;
     }
+
     collectionsMethods.updateRequestProperty(
       params,
       RequestProperty.QUERY_PARAMS,
       currentTabId,
     );
+
     collectionsMethods.updateRequestProperty(
       extractQueryParamstoURL(params),
       RequestProperty.URL,

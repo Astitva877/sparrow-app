@@ -24,6 +24,7 @@ use std::collections::HashMap;
 use tauri::Manager;
 use url_fetch_handler::import_swagger_url;
 use urlencoded_handler::make_www_form_urlencoded_request;
+use urlencoding::{decode, encode};
 
 #[cfg(target_os = "macos")]
 #[macro_use]
@@ -206,6 +207,23 @@ async fn make_request(
         _ => reqwest::Method::GET,
     };
 
+    // Decode the URL
+    let decoded_url = decode(url).unwrap();
+
+    // Check if "%26" exists and replace with "&"
+    let replaced_url = if decoded_url.contains("%26") {
+        decoded_url.replace("%26", "&")
+    } else {
+        decoded_url.clone().to_string()
+    };
+
+    // Check if "3D" exists and replace with "="
+    let replaced_url = if replaced_url.contains("%3D") {
+        replaced_url.replace("%3D", "=")
+    } else {
+        replaced_url.clone()
+    };
+
     // Convert header string into hashmap
     let header_map: HashMap<_, _> = headers
         .split("[SPARROW_AMPERSAND]")
@@ -217,8 +235,8 @@ async fn make_request(
             )
         })
         .collect();
-
-    let mut request_builder = client.request(reqwest_method, url);
+    println!("${}", replaced_url.clone());
+    let mut request_builder = client.request(reqwest_method, replaced_url);
 
     // Add headers in request builder
     for (key, value) in header_map.iter() {

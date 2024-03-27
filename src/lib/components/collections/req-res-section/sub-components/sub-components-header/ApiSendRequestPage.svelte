@@ -222,10 +222,19 @@
     let paramsArray = queryString.split("&");
     let params = paramsArray.map((param) => {
       let keyValue = param.split("=");
+
       if (keyValue.length === 1) {
-        return { key: keyValue[0], value: "", checked: true };
+        return {
+          key: keyValue[0],
+          value: "",
+          checked: true,
+        };
       } else if (keyValue.length === 2) {
-        return { key: keyValue[0], value: keyValue[1], checked: true };
+        return {
+          key: keyValue[0],
+          value: keyValue[1],
+          checked: true,
+        };
       }
     });
 
