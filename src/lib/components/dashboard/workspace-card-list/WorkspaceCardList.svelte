@@ -105,7 +105,7 @@
   <div>
     <div
       class="d-flex flex-wrap gap-5 row-gap-0 overflow-y-auto sparrow-thin-scrollbar"
-      style="max-height: 59vh; height: auto;"
+      style="max-height: calc(100vh - 350px); height: auto;"
     >
       {#if filterText !== "" && workspaces
           .slice()
@@ -114,18 +114,6 @@
               .toLowerCase()
               .includes(filterText.toLowerCase())).length == 0}
         <span class="not-found-text mx-auto ellipsis">No results found.</span>
-      {/if}
-      {#if currPage === 1 && filterText === "" && (openTeam?.admins?.includes(userId) || openTeam?.owner == userId)}
-        <Button
-          disable={workspaceUnderCreation}
-          loader={workspaceUnderCreation}
-          title={`+ Add New Workspace`}
-          type="other"
-          buttonClassProp={`rounded sparrow-fs-16 col-lg-5 col-md-10 flex-grow-1 py-0 mb-4 add-new-workspace`}
-          onClick={handleCreateWorkspace}
-          buttonStyleProp={workspaces.length == 0 ? "min-height:132px" : ""}
-        />
-        <!-- update later the above width -->
       {/if}
       {#each workspaces
         .slice()
@@ -149,6 +137,18 @@
           {activeSideBarTabMethods}
         />
       {/each}
+      {#if currPage === 1 && filterText === "" && (openTeam?.admins?.includes(userId) || openTeam?.owner == userId)}
+        <Button
+          disable={workspaceUnderCreation}
+          loader={workspaceUnderCreation}
+          title={`+ Add New Workspace`}
+          type="other"
+          buttonClassProp={`rounded sparrow-fs-16 col-lg-5 col-md-10 flex-grow-1 py-0 mb-4 add-new-workspace`}
+          onClick={handleCreateWorkspace}
+          buttonStyleProp={"min-height: 132px"}
+        />
+        <!-- update later the above width -->
+      {/if}
     </div>
     {#if !workspaces || workspaces
         .slice()
