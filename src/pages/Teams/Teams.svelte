@@ -90,6 +90,8 @@
 
   const workspaceMethods: WorkspaceMethods = {
     handleCreateTab: _viewModel.handleCreateTab,
+    updateWorkspace: _viewModel.updateWorkspace,
+    disableWorkspaceNewInviteTag: _viewModel.disableWorkspaceNewInviteTag,
   };
   const teamRepositoryMethods: TeamRepositoryMethods = {
     modifyTeam: _viewModel.modifyTeam,
@@ -610,6 +612,7 @@
       {teamServiceMethods}
       {teamRepositoryMethods}
       workspaces={$workspaces}
+      {workspaceMethods}
     />
   </Pane>
 </Splitpanes>

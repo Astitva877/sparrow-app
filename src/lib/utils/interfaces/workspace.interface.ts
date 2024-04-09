@@ -9,6 +9,8 @@ export interface CurrentWorkspace {
 
 export interface WorkspaceMethods {
   handleCreateTab: (data) => void;
+  updateWorkspace: (id, data) => void;
+  disableWorkspaceNewInviteTag: (userId: string, workspaceId: string) => void;
 }
 
 export interface userDetails {

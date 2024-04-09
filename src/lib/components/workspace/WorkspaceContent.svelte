@@ -12,6 +12,7 @@
     Team,
     TeamRepositoryMethods,
     TeamServiceMethods,
+    WorkspaceMethods,
   } from "$lib/utils/interfaces";
   import TeamInvite from "./team-invite/TeamInvite.svelte";
   import { base64ToURL } from "$lib/utils/helpers";
@@ -31,6 +32,7 @@
     teamServiceMethods: TeamServiceMethods,
     teamRepositoryMethods: TeamRepositoryMethods,
     workspaces;
+  export let workspaceMethods: WorkspaceMethods;
   export let handleLeaveTeamModal: () => void;
   export let handleOnShowMoreClick: () => void;
   export let handleCloseShowMoreClick: () => void;
@@ -300,6 +302,7 @@
           {activeSideBarTabMethods}
           {openTeam}
           {userType}
+          {workspaceMethods}
         />
       {:else if selectedView == "GRID" && selectedTab == "all-workspace"}
         <WorkspaceCardList

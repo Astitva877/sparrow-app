@@ -76,7 +76,8 @@
     workspaces = workspaces.filter((ws) => ws._id != workspaceId);
   };
 
-  const hasPermissionToDelete = openTeam?.admins?.includes(userId) || openTeam?.owner == userId;
+  const hasPermissionToDelete =
+    openTeam?.admins?.includes(userId) || openTeam?.owner == userId;
 </script>
 
 <div class="p-2">

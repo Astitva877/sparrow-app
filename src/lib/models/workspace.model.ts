@@ -68,6 +68,10 @@ export const workspaceSchemaLiteral = {
         },
       },
     },
+    isNewInvite: {
+      type: "boolean",
+      default: false,
+    },
     createdAt: {
       type: "string",
     },

@@ -167,6 +167,7 @@ export class HeaderDashboardViewModel {
           createdAt,
           createdBy,
           collection,
+          isNewInvite,
         } = elem;
         const isActiveWorkspace = await this.checkActiveWorkspace(_id);
         if (isActiveWorkspace) isAnyWorkspaceActive = _id;
@@ -183,6 +184,7 @@ export class HeaderDashboardViewModel {
           },
 
           isActiveWorkspace: isActiveWorkspace,
+          isNewInvite,
           createdAt,
           createdBy,
         };

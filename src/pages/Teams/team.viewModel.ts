@@ -356,4 +356,16 @@ export class TeamViewModel {
     }
     return;
   };
+
+  public disableWorkspaceNewInviteTag = async (
+    userId: string,
+    workspaceId: string,
+  ): Promise<Team> => {
+    const response: MakeRequestResponse =
+      await this.userService.disableWorkspaceNewInviteTag(userId, workspaceId);
+    if (response.isSuccessful === true) {
+      return response.data.data;
+    }
+    return;
+  };
 }

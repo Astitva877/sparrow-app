@@ -17,6 +17,7 @@
   import { navigate } from "svelte-navigator";
   import Table from "../../table/Table.svelte";
   import Rows from "../rows/Rows.svelte";
+  import type { WorkspaceMethods } from "$lib/utils/interfaces";
 
   export let userId: string;
   export let data: any;
@@ -26,6 +27,7 @@
   export let handleWorkspaceTab: any;
   export let userType = "";
   export let openTeam: Team;
+  export let workspaceMethods: WorkspaceMethods;
 
   let isShowMoreVisible = undefined;
   let workspacePerPage: number = 10,
@@ -164,6 +166,8 @@
                 {calculateTimeDifferenceInDays}
                 {WorkspaceMemberRole}
                 {userType}
+                {userId}
+                {workspaceMethods}
               />
             {/each}
           {/if}

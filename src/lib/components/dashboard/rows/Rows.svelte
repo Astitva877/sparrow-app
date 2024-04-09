@@ -5,10 +5,12 @@
   import { TeamRole } from "$lib/utils/enums";
 
   export let list;
+  export let userId;
   export let currOpenedTeamRxDoc;
   export let handleOpenCollection;
   export let calculateTimeDifferenceInDays;
   export let WorkspaceMemberRole;
+  export let workspaceMethods;
   export let userType = "";
 
   let pos = { x: 0, y: 0 };
@@ -60,6 +62,19 @@
   function closeRightClickContextMenu() {
     showMenu = false;
   }
+  const handleDisableNewTag = async () => {
+    if (list?.isNewInvite) {
+      let data = await workspaceMethods.disableWorkspaceNewInviteTag(
+        userId,
+        list._id,
+      );
+      if (data) {
+        workspaceMethods.updateWorkspace(list._id, {
+          isNewInvite: false,
+        });
+      }
+    }
+  };
 </script>
 
 {#if showMenu}
@@ -85,11 +100,19 @@
     on:click={(e) => {
       e.stopPropagation();
       handleOpenCollection(list);
+      handleDisableNewTag();
     }}
     style="max-width: 15vw; padding-right: 10px;"
-    class="tab-data rounded-start py-3 overflow-hidden ellipsis"
-    >{list?.name}</td
-  >
+    class="tab-data rounded-start py-3 overflow-hidden ellipsis d-flex align-items-center"
+    >{list?.name}
+    {#if list.isNewInvite}
+      <p
+        class="mb-0 new-invite text-labelColor w-50 justify-content-center ms-1"
+      >
+        NEW
+      </p>
+    {/if}
+  </td>
 
   <td
     on:click={(e) => {
@@ -148,6 +171,9 @@
 <style>
   tr:hover {
     background-color: var(--background-light);
+  }
+  .new-invite {
+    font-size: 12px !important;
   }
   .workspace-list-item td {
     background-color: transparent;
