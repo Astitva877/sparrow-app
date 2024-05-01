@@ -194,6 +194,13 @@ const makeHttpRequestV2 = async (
   request: string,
 ) => {
   // create a race condition between the timeout and the api call
+  console.log("body---------->", body);
+  body = "C:\\Users\\91877\\Downloads\\sparrow.mp4";
+  request = "binary";
+  // url = "https://api.upload.io/v1/files/basic";
+  // url = "https://myURL.amazonaws.com/v1/bucket";
+  // method = "POST";
+
   return Promise.race([
     timeout(apiTimeOut),
     // Invoke communication

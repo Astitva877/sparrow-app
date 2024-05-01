@@ -9,6 +9,7 @@
 //!
 //! Each submodule contains functions for making specific types of HTTP requests.
 //! Use these modules based on your application's requirements.
+pub mod binary_handler;
 pub mod formdata_handler_v2;
 pub mod http_requests;
 pub mod json_handler_v2;

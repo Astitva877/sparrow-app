@@ -47,6 +47,7 @@ use formdata_handler::make_formdata_request;
 use json_handler::make_json_request;
 use nfd::Response;
 use raw_handler::make_text_request;
+use request_handler::binary_handler::send_file_to_endpoint;
 use request_handler::formdata_handler_v2::make_formdata_request_v2;
 use request_handler::http_requests::make_without_body_request;
 use request_handler::json_handler_v2::make_json_request_v2;
@@ -317,6 +318,7 @@ async fn make_request_v2(
         }
         "multipart/form-data" => make_formdata_request_v2(request_builder, body).await,
         "text/plain" => make_text_request(request_builder, body).await,
+        "binary" => send_file_to_endpoint(request_builder, body).await,
         _ => make_without_body_request(request_builder).await,
     };
 
