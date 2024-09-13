@@ -3,15 +3,22 @@
   import { Handle, Position } from "@xyflow/svelte";
   import { ArrowIcon } from "../../icons";
   import { VectorIcon } from "@library/icons";
+  import SelectApiRequest from "../select-api/SelectAPIRequest.svelte";
+  import { onMount } from "svelte";
 
   export let data: {
     onCheckEdges: (id: string) => boolean;
-    label: string;
+    name: string;
     onClick: (id: string) => void;
+    onUpdateSelectedAPI: (id: string, name: string, requestId: string) => void;
   };
   export let id;
 
   let isAddBlockVisible = false;
+  onMount(() => console.log("id", id));
+  const updateNode = (name: string, requestId: string) => {
+    data.onUpdateSelectedAPI(id, name, requestId);
+  };
 </script>
 
 <div
@@ -36,7 +43,9 @@
     <span class="text-fs-12 text-fs-10 text-secondary-200"
       >Select an API request</span
     >
+    <SelectApiRequest {updateNode} />
   </div>
+
   <Handle type="source" position={Position.Right} />
   {#if isAddBlockVisible}
     <div class="add-block-btn" style="position: absolute;   ">

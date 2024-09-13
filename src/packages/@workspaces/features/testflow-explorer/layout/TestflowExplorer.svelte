@@ -77,7 +77,14 @@
             onCheckEdges: function (_id: string) {
               return checkIfEdgesExist(_id);
             },
-            label: "REST API Request",
+            onUpdateSelectedAPI: function (
+              _id: string,
+              name: string,
+              requestId: string,
+            ) {
+              updateSelectedAPI(_id, name, requestId);
+            },
+            name: "REST API Request",
           },
           position: nextNodePosition,
           deletable: true,
@@ -112,7 +119,14 @@
             onCheckEdges: function (_id: string) {
               return checkIfEdgesExist(_id);
             },
-            label: "REST API Request",
+            onUpdateSelectedAPI: function (
+              _id: string,
+              name: string,
+              requestId: string,
+            ) {
+              updateSelectedAPI(_id, name, requestId);
+            },
+            name: "REST API Request",
           },
           position: {
             x: dbNodes[i].position.x,
@@ -136,6 +150,20 @@
       return res;
     });
   });
+
+  const updateSelectedAPI = (id: string, name: string, requestId: string) => {
+    nodes.update((_nodes) => {
+      const dbNodes = $tab?.property?.testflow?.nodes;
+      console.log("dbnodes", dbNodes, id, name, requestId);
+      for (let index = 0; index < dbNodes.length; index++) {
+        if (dbNodes[index].id === id) {
+          dbNodes[index].data.requestId = requestId;
+          dbNodes[index].data.name = name;
+        }
+      }
+      return dbNodes;
+    });
+  };
 
   const nodeTypes = {
     startBlock: StartBlock,

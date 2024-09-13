@@ -466,6 +466,14 @@ export const tabSchemaLiteral = {
                   },
                   data: {
                     type: "object",
+                    properties: {
+                      name: {
+                        type: "string",
+                      },
+                      requestId: {
+                        type: "string",
+                      },
+                    },
                   },
                   position: {
                     type: "object",

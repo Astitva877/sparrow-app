@@ -38,7 +38,8 @@ export class TestflowExplorerPageViewModel {
         id: elem.id,
         type: elem.type,
         data: {
-          label: elem.data.label,
+          name: elem.data.name,
+          requestId: elem.data.requestId,
         },
         position: { x: elem.position.x, y: elem.position.y },
       };
@@ -63,4 +64,8 @@ export class TestflowExplorerPageViewModel {
   };
 
   public updateEdges = new Debounce().debounce(this.updateEdgesDebounce, 300);
+
+  public updateSelectedAPI = async (nodeId: string) => {
+    const progressiveTab = createDeepCopy(this._tab.getValue());
+  };
 }
