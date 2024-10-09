@@ -230,12 +230,29 @@ export default class CollectionsViewModel {
     const ws = await this.workspaceRepository.getActiveWorkspaceDoc();
     isApiCreatedFirstTime.set(true);
     if (ws) {
-      const initRequestTab = new InitRequestTab(
-        "UNTRACKED-" + uuidv4(),
-        ws._id,
-      );
-      initRequestTab.updateChatbotState(true);
-      this.tabRepository.createTab(initRequestTab.getValue());
+      await this.fetchCollections(ws?._id);
+      const res = await this.collectionService.fetchCollection(ws._id);
+      if (res.isSuccessful) {
+        // const collection = await this.collectionRepository.getCollectionDoc();
+        const requestTabAdapter = new RequestTabAdapter();
+        console.log("requestdta", res);
+        debugger;
+        const adaptedRequest = requestTabAdapter.adapt(
+          ws._id || "",
+          res.data.data[0]?.id || "",
+          "",
+          res.data.data[0]?.items[0],
+        );
+        this.tabRepository.createTab(adaptedRequest);
+      }
+      setTimeout(async () => {}, 2000);
+
+      // const initRequestTab = new InitRequestTab(
+      //   "UNTRACKED-" + uuidv4(),
+      //   ws._id,
+      // );
+      // initRequestTab.updateChatbotState(true);
+      // this.tabRepository.createTab(initRequestTab.getValue());
       moveNavigation("right");
     } else {
       setTimeout(() => {

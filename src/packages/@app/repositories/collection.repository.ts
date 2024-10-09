@@ -67,6 +67,13 @@ export class CollectionRepository {
       .$;
   };
 
+  public getCollectionDoc = (): Promise<CollectionDocument[]> => {
+    return RxDB.getInstance()
+      .rxdb.collection.find()
+      .sort({ createdAt: "asc" })
+      .exec();
+  };
+
   // public updateCollection = async (
   //   collectionId,
   // ): Observable<CollectionDocument[]> => {};
