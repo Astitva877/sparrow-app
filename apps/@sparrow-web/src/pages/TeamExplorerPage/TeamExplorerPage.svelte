@@ -9,7 +9,10 @@
 
   import { DeleteWorkspace } from "@sparrow/common/features";
   import { onMount } from "svelte";
-  import { InviteToWorkspace } from "@sparrow/workspaces/features";
+  import {
+    InviteToWorkspace,
+    InviteToWorkspaceWeb,
+  } from "@sparrow/workspaces/features";
 
   let isDeleteWorkspaceModalOpen = false;
   let selectedWorkspace: WorkspaceDocument;
@@ -172,7 +175,7 @@
     isWorkspaceInviteModalOpen = flag;
   }}
 >
-  <InviteToWorkspace
+  <InviteToWorkspaceWeb
     handleInvitePopup={(flag = false) => {
       isWorkspaceInviteModalOpen = flag;
     }}

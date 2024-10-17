@@ -9,6 +9,7 @@ export * from "./tab-bar";
 export * from "./workspace-default";
 export * from "./workspace-explorer";
 export * from "./invite-to-workspace";
+export * from "./invite-to-workspace-web";
 export * from "./chat-bot";
 export * from "./socket-explorer";
 export * from "./environment-list";
