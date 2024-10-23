@@ -1,3 +1,4 @@
+import { InitWorkspaceTab } from "@sparrow/common/utils";
 import { EnvironmentRepository } from "../../repositories/environment.repository";
 import { GuestUserRepository } from "../../repositories/guest-user.repository";
 import { GuideRepository } from "../../repositories/guide.repository";
@@ -5,6 +6,8 @@ import { TeamRepository } from "../../repositories/team.repository";
 import { WorkspaceRepository } from "../../repositories/workspace.repository";
 import { InitTab } from "@sparrow/common/factory";
 import { v4 as uuidv4 } from "uuid";
+import { navigate } from "svelte-navigator";
+import { TabRepository } from "@app/repositories/tab.repository";
 
 export class AuthViewModel {
   constructor() {}
@@ -14,6 +17,7 @@ export class AuthViewModel {
   private environmentRepository = new EnvironmentRepository();
   private initTab = new InitTab();
   private guideRepository = new GuideRepository();
+  private tabRepository = new TabRepository();
 
   /**
    * Insert the guestr user in local DB
@@ -102,5 +106,20 @@ export class AuthViewModel {
 
     this.guideRepository.insert({ isActive: true, id: "environment-guide" });
     this.guideRepository.insert({ isActive: true, id: "collection-guide" });
+  };
+
+  /**
+   * Switch from one workspace to another
+   * @param id - Workspace id
+   */
+  public handleSwitchWorkspace = async (id: string) => {
+    if (!id) return;
+    const res = await this.workspaceRepository.readWorkspace(id);
+    const initWorkspaceTab = new InitWorkspaceTab(id, id);
+    initWorkspaceTab.updateId(id);
+    initWorkspaceTab.updateName(res.name);
+    await this.tabRepository.createTab(initWorkspaceTab.getValue(), id);
+    await this.workspaceRepository.setActiveWorkspace(id);
+    navigate("/dashboard/collections");
   };
 }

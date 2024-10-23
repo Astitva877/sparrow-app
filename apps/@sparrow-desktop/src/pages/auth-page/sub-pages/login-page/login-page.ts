@@ -12,6 +12,7 @@ import { Events } from "@sparrow/common/enums/mixpanel-events.enum";
 import { GuideRepository } from "../../../../repositories/guide.repository";
 
 import { isUserFirstSignUp } from "@app/store/user.store";
+import { AuthViewModel } from "../../Auth.ViewModel";
 
 //------------------------------MixPanel-------------------------------//
 
@@ -59,42 +60,70 @@ const handleLogin = async (loginCredentials: loginUserPostBody) => {
   }
 };
 export async function handleLoginV2(url: string) {
+  const _viewModel = new AuthViewModel();
   const params = new URLSearchParams(url.split("?")[1]);
   const accessToken = params.get("accessToken");
   const refreshToken = params.get("refreshToken");
+  const workspaceId = params.get("workspaceId");
   const event = params.get("event");
   const method = params.get("method");
 
-  if (accessToken && refreshToken) {
+  const existingUserAccessToken = localStorage.getItem(constants.AUTH_TOKEN);
+  if (workspaceId && existingUserAccessToken) {
     const userDetails = jwtDecode(accessToken);
-    setAuthJwt(constants.AUTH_TOKEN, accessToken);
-    setAuthJwt(constants.REF_TOKEN, refreshToken);
-    setUser(jwtDecode(accessToken));
-    sendUserDataToMixpanel(userDetails);
-
-    notifications.success("You're logged in successfully.");
-    if (event === "register") {
-      navigate("/app/collections?first=true");
-      isUserFirstSignUp.set(true);
-      MixpanelEvent(Events.USER_SIGNUP, {
-        method: method,
-        Success: true,
-      });
-      _guideRepository.insert({ isActive: true, id: "environment-guide" });
-      _guideRepository.insert({ isActive: true, id: "collection-guide" });
+    const existingUserDetail = jwtDecode(existingUserAccessToken);
+    console.log(
+      workspaceId,
+      existingUserAccessToken,
+      userDetails,
+      existingUserDetail,
+    );
+    if (userDetails.email === existingUserDetail.email) {
+      console.log(
+        "switch workspace here 2",
+        workspaceId,
+        existingUserAccessToken,
+        "token",
+      );
+      _viewModel.handleSwitchWorkspace(workspaceId);
     } else {
-      navigate("/app/collections?first=false");
-      MixpanelEvent(Events.USER_LOGIN, {
-        method: method,
-        Success: true,
-      });
-      _guideRepository.insert({ isActive: false, id: "environment-guide" });
-      _guideRepository.insert({ isActive: false, id: "collection-guide" });
+      console.log("different account so show pop up");
     }
-    // _activeSidebarTabViewModel.addActiveTab("collections");
-    await resizeWindowOnLogin();
   } else {
-    notifications.error("Invalid token!");
+    if (accessToken && refreshToken) {
+      const userDetails = jwtDecode(accessToken);
+      setAuthJwt(constants.AUTH_TOKEN, accessToken);
+      setAuthJwt(constants.REF_TOKEN, refreshToken);
+      setUser(jwtDecode(accessToken));
+      sendUserDataToMixpanel(userDetails);
+
+      notifications.success("You're logged in successfully.");
+      if (event === "register") {
+        navigate("/app/collections?first=true");
+        isUserFirstSignUp.set(true);
+        MixpanelEvent(Events.USER_SIGNUP, {
+          method: method,
+          Success: true,
+        });
+        _guideRepository.insert({ isActive: true, id: "environment-guide" });
+        _guideRepository.insert({ isActive: true, id: "collection-guide" });
+      } else {
+        navigate("/app/collections?first=false");
+        MixpanelEvent(Events.USER_LOGIN, {
+          method: method,
+          Success: true,
+        });
+        _guideRepository.insert({ isActive: false, id: "environment-guide" });
+        _guideRepository.insert({ isActive: false, id: "collection-guide" });
+        if (workspaceId) {
+          _viewModel.handleSwitchWorkspace(workspaceId);
+        }
+      }
+      // _activeSidebarTabViewModel.addActiveTab("collections");
+      await resizeWindowOnLogin();
+    } else {
+      notifications.error("Invalid token!");
+    }
   }
 }
 

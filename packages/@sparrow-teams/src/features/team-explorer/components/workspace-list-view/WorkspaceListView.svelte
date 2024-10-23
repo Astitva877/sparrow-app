@@ -18,6 +18,7 @@
   export let searchQuery;
 
   export let onDeleteWorkspace;
+  export let isWebApp = false;
 
   /**
    * Checks if the current user has admin or owner privileges.
@@ -27,6 +28,8 @@
   export let isGuestUser = false;
 
   export let onAddMember;
+
+  export let handleOpenDesktop;
 
   let filterText = "";
 
@@ -66,6 +69,8 @@
               .sort((a, b) => a.name.localeCompare(b.name))
               .slice((currPage - 1) * workspacePerPage, currPage * workspacePerPage) as list, index}
               <Rows
+                {isWebApp}
+                {handleOpenDesktop}
                 {onAddMember}
                 {list}
                 activeTeam={openTeam}

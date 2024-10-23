@@ -98,6 +98,10 @@
 
   export let onAddMember;
 
+  export let isInstalPopupOpen = false;
+
+  export let handleOpenDesktop;
+
   let selectedView: string = "Grid";
 
   const selectedViewSubscribe = workspaceView.subscribe((value) => {
@@ -386,6 +390,7 @@
             <div style="flex:1; overflow:auto;">
               {#if selectedView === TeamViewEnum.LIST}
                 <WorkspaceListView
+                  {handleOpenDesktop}
                   {onAddMember}
                   bind:isGuestUser
                   {searchQuery}
@@ -397,6 +402,7 @@
                     );
                   }) || []}
                   {onSwitchWorkspace}
+                  {isWebApp}
                   {onDeleteWorkspace}
                   isAdminOrOwner={userRole === TeamRole.TEAM_ADMIN ||
                     userRole === TeamRole.TEAM_OWNER}

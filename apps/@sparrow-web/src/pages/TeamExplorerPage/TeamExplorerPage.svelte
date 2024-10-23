@@ -15,6 +15,8 @@
   import { onDestroy, onMount } from "svelte";
   import { InviteToWorkspace } from "@sparrow/workspaces/features";
   import { BackIcon } from "@sparrow/library/icons";
+  import { navigate } from "svelte-navigator";
+  import { DownloadPopUp } from "@sparrow/common/components";
   export let activeTeamTab;
   export let onUpdateActiveTab;
 
@@ -114,6 +116,35 @@
       isWorkspaceOpen = false;
     }
   }
+  let isInstalPopupOpen = false;
+  const handleOpenDesktop = (workspace) => {
+    const accessToken = localStorage.getItem("AUTH_TOKEN");
+    const refreshToken = localStorage.getItem("REF_TOKEN");
+    const sparrowRedirect = `sparrow://?accessToken=${accessToken}&refreshToken=${refreshToken}&event=login&method=email&workspaceId=${workspace._id}`;
+    console.log(workspace, "workspace");
+    try {
+      const data = navigate(sparrowRedirect);
+    } catch (error) {
+      console.log("app not exist");
+      isInstalPopupOpen = true;
+    }
+    // if (sparrowRedirect) {
+    //   isInstalPopupOpen = true;
+    //   window.addEventListener(
+    //     "blur",
+    //     () => {
+    //       isInstalPopupOpen = false;
+    //     },
+    //     { once: true },
+    //   );
+    //   window.location.href = sparrowRedirect;
+    // } else {
+    //   navigate("https://sparrowapp.dev/");
+    // }
+  };
+  function closeWelcomePopup() {
+    isInstalPopupOpen = false;
+  }
 
   const handleWorkspaceDetails = ({ workspaceID, workspaceName, users }) => {
     workspaceDetails.id = workspaceID;
@@ -177,6 +208,7 @@
     bind:userId
     bind:isTeamInviteModalOpen
     bind:isLeaveTeamModelOpen
+    bind:isInstalPopupOpen
     onAddMember={handleWorkspaceDetails}
     openTeam={$activeTeam}
     workspaces={$workspaces}
@@ -196,9 +228,19 @@
     onChangeUserRoleAtWorkspace={_viewModel.changeUserRoleAtWorkspace}
     onUpdateTeam={_viewModel.updateTeam}
     isWebApp={true}
+    {handleOpenDesktop}
   />
 {/if}
-
+<Modal
+  title=""
+  type="dark"
+  width="45%"
+  zIndex={1000}
+  isOpen={isInstalPopupOpen}
+  handleModalState={closeWelcomePopup}
+>
+  <DownloadPopUp />
+</Modal>
 <Modal
   title={"Invite Team Members"}
   type={"dark"}

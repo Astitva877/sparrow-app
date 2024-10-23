@@ -3,6 +3,7 @@
   import { UserProfileList } from "@sparrow/teams/compopnents";
   import { MenuView } from "@sparrow/teams/compopnents";
   import { TeamRole, WorkspaceMemberRole } from "@sparrow/common/enums";
+  import { Link, navigate } from "svelte-navigator";
 
   export let list;
   export let activeTeam;
@@ -16,6 +17,9 @@
    */
   export let isAdminOrOwner: boolean;
   export let onDeleteWorkspace;
+
+  export let isWebApp = false;
+  export let handleOpenDesktop;
 
   let pos = { x: 0, y: 0 };
   let showMenu = false;
@@ -78,6 +82,12 @@
   function closeRightClickContextMenu() {
     showMenu = false;
   }
+  const openDesktop = () => {
+    const accessToken = localStorage.getItem("AUTH_TOKEN");
+    const refreshToken = localStorage.getItem("REF_TOKEN");
+    const sparrowRedirect = `sparrow://?accessToken=${accessToken}&refreshToken=${refreshToken}&event=login&method=email&workspaceId=234567`;
+    navigate(sparrowRedirect);
+  };
 </script>
 
 {#if showMenu}
@@ -149,6 +159,18 @@
     class="tab-data py-3"
     >{calculateTimeDifferenceInDays(new Date(), new Date(list?.updatedAt))}</td
   >
+  <td class="tab-data py-3 position-relative">
+    {#if isWebApp}
+      <button
+        class="open-desktop-btn border-0 rounded d-flex justify-content-center align-items-center text-decoration-underline"
+        on:click|stopPropagation={() => {
+          handleOpenDesktop(list);
+        }}
+      >
+        Open in Desktop
+      </button>
+    {/if}
+  </td>
   <td class="tab-data rounded-end py-3">
     <button
       bind:this={workspaceTabWrapper}
@@ -174,6 +196,7 @@
   .threedot-icon-container {
     visibility: hidden;
     background-color: transparent;
+    z-index: 2;
   }
   tr:hover .threedot-icon-container {
     visibility: visible;
@@ -187,5 +210,28 @@
     font-size: 12px;
     font-weight: 700;
     line-height: 18px;
+  }
+  .open-desktop-btn {
+    position: absolute;
+    top: 50%;
+    right: 30px;
+    transform: translateY(-50%);
+    font-size: 12px;
+    font-weight: 700;
+    background-color: var(--color-primary);
+    color: #3670f7;
+    padding: 5px 10px;
+    visibility: hidden;
+    opacity: 0;
+    transition:
+      opacity 0.3s ease,
+      visibility 0.3s;
+  }
+  tr:hover .open-desktop-btn {
+    visibility: visible;
+    opacity: 1;
+  }
+  .open-desktop-btn:hover {
+    background-color: var(--color-primary-dark);
   }
 </style>
