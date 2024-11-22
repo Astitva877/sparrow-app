@@ -82,6 +82,7 @@
   .tab-active {
     color: var(--text-secondary-100);
     border-bottom: 2px solid var(--border-primary-300) !important;
+    padding-bottom: 3px;
   }
   .tab-active-text {
     color: var(--text-secondary-200);

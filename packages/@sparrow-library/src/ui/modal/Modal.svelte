@@ -116,13 +116,15 @@
   .sparrow-modal-close-icon-btn {
     background-color: transparent;
     position: absolute;
-    top: 2px;
-    right: 2px;
+    top: 31px;
+    right: 31px;
   }
   .sparrow-modal-close-icon-btn:hover {
     background-color: var(--bg-tertiary-300);
+    border-radius: 2px;
   }
   .sparrow-modal-close-icon-btn:active {
     background-color: var(--bg-danger-200);
+    border-radius: 2px;
   }
 </style>
