@@ -122,3 +122,4 @@ export { default as ThreeDotIcon } from "./ThreeDot.svelte";
 export { default as AiSparkleIconV2 } from "./AiSparkleV2.svelte";
 
 export { default as AiSparkleIconV3 } from "./AiSparkleV3.svelte";
+export { default as SparrowChristmasIcon } from "./ChristmasLogo.svelte";

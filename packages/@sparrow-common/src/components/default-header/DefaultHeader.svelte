@@ -8,6 +8,7 @@
   import { onMount } from "svelte";
   import { OSDetector } from "../../utils";
   import WindowAction from "../header/window-action/WindowAction.svelte";
+  import ChristmasLogo from "../../../../@sparrow-library/src/icons/ChristmasLogo.svelte";
 
   let isWindows = false;
   let os = "";
@@ -47,11 +48,12 @@
     {/if}
 
     <div>
-      <SparrowIcon
+      <!-- <SparrowIcon
         height="17px"
         width="17px"
         color="var(--primary-btn-color)"
-      />
+      /> -->
+      <ChristmasLogo />
     </div>
   </div>
 
