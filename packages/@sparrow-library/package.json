@@ -21,7 +21,8 @@
     "./ui": "./src/ui/index.ts",
     "./utils": "./src/utils/index.ts",
     "./ui/list/types": "./src/ui/list/types.ts",
-    "./styles": "./src/styles/style.scss"
+    "./styles": "./src/styles/style.scss",
+    "./systemIcon": "./src/styles/FluentSystemIcons-Resizable.css"
   },
   "devDependencies": {
     "@fontsource/fira-mono": "^4.5.10",
