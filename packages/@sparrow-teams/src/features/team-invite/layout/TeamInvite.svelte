@@ -10,6 +10,7 @@
 
   import { TeamRole, WorkspaceRole } from "@sparrow/common/enums/team.enum";
   import { Button, IconFallback } from "@sparrow/library/ui";
+  import { MultiInput } from "@sparrow/common/components";
 
   export let onInviteClick;
   export let workspaces;
@@ -223,7 +224,7 @@
   };
 </script>
 
-<div class="d-flex flex-column pt-2">
+<!-- <div class="d-flex flex-column pt-2">
   <p class="invite-header text-secondary-1000 mb-0">
     Invite by Email<span class="asterik">*</span>
   </p>
@@ -273,8 +274,8 @@
   {:else if emailError && emailstoBeSentArr.length === 0}
     <p class="error-text">Email ID cannot be empty.</p>
   {/if}
-</div>
-
+</div> -->
+<MultiInput heading="Invite" {onValidateEmail} {validateEmail} {users} />
 <div class="mt-4">
   <p class="role-title text-fs-14 text-secondary-1000 mb-1">
     Role<span class="asterik">*</span>
