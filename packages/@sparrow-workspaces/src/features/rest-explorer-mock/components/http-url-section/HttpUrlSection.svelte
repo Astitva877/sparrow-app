@@ -6,6 +6,7 @@
   import { UrlInputTheme } from "../../../../utils/";
   import { Tooltip } from "@sparrow/library/ui";
   import { ArrowUpRightRegular, SaveRegular } from "@sparrow/library/icons";
+  import { MockCodeMirrorInput } from "./sub-url-section";
 
   let componentClass = "";
   export { componentClass as class };
@@ -131,7 +132,7 @@
   />
   <div class="w-100 d-flex align-items-center position-relative">
     <div class="position-absolute top-0" style="width: calc(100% );">
-      <CodeMirrorInput
+      <MockCodeMirrorInput
         value={requestUrl}
         onUpdateInput={onUpdateRequestUrl}
         placeholder={"Enter a URL"}
