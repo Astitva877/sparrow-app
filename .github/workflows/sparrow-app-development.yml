@@ -3,8 +3,9 @@ name: Development release
 on:
   push:
     branches:
-      - development
-      - design-system
+      # - development
+      # - design-system
+    - astitva/development-build-fix
   workflow_dispatch:
 
 env:
@@ -90,11 +91,11 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.PR_GITHUB_TOKEN }}
 
-      - name: msi sig
-        run: Get-Content D:\a\sparrow-app\sparrow-app\apps\@sparrow-desktop\src-tauri\target\debug\bundle\msi\*.sig
+      # - name: msi sig
+      #   run: Get-Content D:\a\sparrow-app\sparrow-app\apps\@sparrow-desktop\src-tauri\target\debug\bundle\msi\*.sig
 
-      - name: nsis sig
-        run: Get-Content D:\a\sparrow-app\sparrow-app\apps\@sparrow-desktop\src-tauri\target\debug\bundle\nsis\*.sig
+      # - name: nsis sig
+      #   run: Get-Content D:\a\sparrow-app\sparrow-app\apps\@sparrow-desktop\src-tauri\target\debug\bundle\nsis\*.sig
 
       - name: sign msi
         run: |
