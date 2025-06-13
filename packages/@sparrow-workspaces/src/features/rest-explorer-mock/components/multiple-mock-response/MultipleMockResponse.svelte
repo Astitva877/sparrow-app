@@ -78,6 +78,9 @@
       activeResponseIdx = idx;
     }, 100);
   }
+  $: {
+    console.log("mock respions", mockResponses);
+  }
 </script>
 
 <svelte:window
@@ -264,6 +267,10 @@
               onHandleMockResponseState(
                 response.id,
                 !response.mockRequestResponse.isMockResponseActive,
+              );
+              console.log(
+                "mock response active",
+                response.mockRequestResponse.isMockResponseActive,
               );
             }}
           />
