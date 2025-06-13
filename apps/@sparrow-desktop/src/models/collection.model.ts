@@ -223,9 +223,6 @@ const mockRequestResponseItems = {
   responseStatus: {
     type: "string",
   },
-  isMockResponseActive: {
-    type: "boolean",
-  },
 };
 
 const websocketItems = {
@@ -318,6 +315,9 @@ const itemsProperties = {
   isDeleted: {
     type: "boolean",
   },
+  isMockResponseActive: {
+    type: "boolean",
+  },
   request: {
     type: "object",
     properties: requestItems,
@@ -372,7 +372,7 @@ export const collectionSchemaLiteral = {
   title: "collection",
   primaryKey: "id",
   type: "object",
-  version: 15,
+  version: 16,
   properties: {
     collectionId: {
       type: "string",

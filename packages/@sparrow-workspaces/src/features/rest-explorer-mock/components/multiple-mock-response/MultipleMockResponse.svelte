@@ -78,9 +78,6 @@
       activeResponseIdx = idx;
     }, 100);
   }
-  $: {
-    console.log("mock respions", mockResponses);
-  }
 </script>
 
 <svelte:window
@@ -257,7 +254,7 @@
         </button>
         {#if userRole !== WorkspaceRole.WORKSPACE_VIEWER}
           <Toggle
-            bind:isMockResponseActive={response.mockRequestResponse
+            isMockResponseActive={response.mockRequestResponse
               .isMockResponseActive}
             label=""
             fontSize="12px"

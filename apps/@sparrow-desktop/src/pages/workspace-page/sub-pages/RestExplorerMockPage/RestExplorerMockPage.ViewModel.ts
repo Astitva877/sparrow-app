@@ -3134,9 +3134,9 @@ class RestExplorerMockViewModel {
             mockResponseId,
             {
               mockRequestResponse: {
-                isMockResponseActive: isMockResponseActive
-              }
-            }
+                isMockResponseActive: isMockResponseActive,
+              },
+            },
           );
         } else {
           this.collectionRepository.updateMockResponseInCollection(
@@ -3145,14 +3145,15 @@ class RestExplorerMockViewModel {
             mockResponseId,
             {
               mockRequestResponse: {
-                isMockResponseActive: isMockResponseActive
-              }
-            }
+                isMockResponseActive: isMockResponseActive,
+              },
+            },
           );
         }
         progressiveTab.property?.mockRequest?.items?.forEach((item) => {
           if (item.id === mockResponseId) {
-            item.mockRequestResponse.isMockResponseActive = isMockResponseActive;
+            item.mockRequestResponse.isMockResponseActive =
+              isMockResponseActive;
           }
         });
 

@@ -41,7 +41,10 @@ import {
   windowSettingsSchema,
   type WindowSettingsDocType,
 } from "../models/window-settings-model";
-import { aiRequestConversationsSchema, type AiRequestConversationsDocType } from "../models/ai-request-conversations.model";
+import {
+  aiRequestConversationsSchema,
+  type AiRequestConversationsDocType,
+} from "../models/ai-request-conversations.model";
 
 import { releaseSchema, type ReleaseDocType } from "../models/release.model";
 import { guideSchema, type GuideDocType } from "../models/guide.model";
@@ -94,7 +97,8 @@ export type GuestDocument = RxDocument<GuestUserDocType>;
 export type UpdatesDocument = RxDocument<UpdatesDocType>;
 export type RecentWorkspaceDocument = RxDocument<RecentWorkspaceDocType>;
 export type RecentWorkspaceContainer = RxCollection<RecentWorkspaceDocType>;
-export type AiRequestConversationsDocument = RxDocument<AiRequestConversationsDocType>;
+export type AiRequestConversationsDocument =
+  RxDocument<AiRequestConversationsDocType>;
 // collate all the Rx collections
 
 export type TabDocument = RxDocument<TabDocType>;
@@ -123,7 +127,7 @@ export type DatabaseType = RxDatabase<DatabaseCollections>;
 export class RxDB {
   private static instance: RxDB | null = null;
   public rxdb: DatabaseType | null = null;
-  private constructor() { }
+  private constructor() {}
 
   public static getInstance(): RxDB {
     if (!RxDB.instance?.rxdb) {
@@ -392,12 +396,15 @@ export class RxDB {
           },
           28: function (oldDoc: TabDocument) {
             if (oldDoc?.property?.aiRequest) {
-              oldDoc.property.aiRequest.state.isChatbotConversationLoading = false;
-              oldDoc.property.aiRequest.state.isConversationHistoryPanelOpen = false;
-              oldDoc.property.aiRequest.state.isConversationHistoryLoading = false;
+              oldDoc.property.aiRequest.state.isChatbotConversationLoading =
+                false;
+              oldDoc.property.aiRequest.state.isConversationHistoryPanelOpen =
+                false;
+              oldDoc.property.aiRequest.state.isConversationHistoryLoading =
+                false;
             }
             return oldDoc;
-          }
+          },
         },
       },
       collection: {
@@ -447,6 +454,9 @@ export class RxDB {
             return oldDoc;
           },
           15: function (oldDoc: CollectionDocument) {
+            return oldDoc;
+          },
+          16: function (oldDoc: CollectionDocument) {
             return oldDoc;
           },
         },
@@ -617,8 +627,8 @@ export class RxDB {
         schema: recentWorkspaceSchema,
       },
       aiRequestConversations: {
-        schema: aiRequestConversationsSchema
-      }
+        schema: aiRequestConversationsSchema,
+      },
     });
     return { rxdb: this.rxdb };
   }
