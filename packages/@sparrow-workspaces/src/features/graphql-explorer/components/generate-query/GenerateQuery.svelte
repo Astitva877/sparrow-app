@@ -91,7 +91,6 @@
    */
   const saveSchemaToDatabase = (isCheckBoxChecked: boolean) => {
     const s = JSON.parse(schema);
-    s.isCheckBoxChecked = isCheckBoxChecked;
     if (requestOperationSection === GraphqlRequestOperationTabEnum.QUERY) {
       s.Query.items = querySchema;
     } else if (
@@ -99,7 +98,7 @@
     ) {
       s.Mutation.items = querySchema;
     }
-    updateSchema(JSON.stringify(s));
+    updateSchema(JSON.stringify(s), isCheckBoxChecked);
   };
 
   /**
@@ -353,7 +352,7 @@
         _isLeafNode,
       );
     }
-    saveSchemaToDatabase(isCheckBoxChecked);
+    saveSchemaToDatabase(false);
   };
 
   /**
@@ -441,8 +440,8 @@
         }
       }
     }
-    saveSchemaToDatabase(!_isCheckedNode);
-    queryBuilder = queryBuilder;
+
+    saveSchemaToDatabase(true);
   };
 
   /**
